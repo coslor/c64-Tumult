@@ -3,32 +3,11 @@
  * 						Atari 2600. 
 *******************************************************************************/
 
-#include <c64/vic.h>
-#include <c64/sprites.h>
-#include <string.h>
-#include <conio.h>
-#include <stdio.h>
-#include <stdlib.h>
-//#include <stdarg.h>
-#include <c64/joystick.h>
 
 #define DEBUG
 
-// struct SPDHeader5
-// {
-// 	unsigned char 	mID[3];
-// 	unsigned char 	mVersion[1];
-// 	unsigned char 	mFlags;
-// 	unsigned int	mNumSprites, mNumTiles;
-// 	unsigned char 	mNumSpriteAnmis, mNumTileAnims;
-// 	unsigned char 	mTileWidth, mTileHeight;
-// 	unsigned char 	mColors[3];
-// 	unsigned char 	mSpriteOverlayDist, mTileOverlayDist;
-// };
+#include "includes/Tumult.h"
 
-// struct loc {
-// 	int x,y;
-// };
 
 const char SPRITE_BYTES[] = {
 	#embed  spd_sprites "assets/Tumult.spd"
@@ -38,45 +17,25 @@ const char SPRITE_ATTRIBS[] = {
 	#embed spd_sprites "assets/Tumult.spd"
 };
 
-// enum SourceFileDecoder
-// {
-// 	SFD_NONE,
-// 	SFD_CTM_CHARS,
-// 	SFD_CTM_CHAR_ATTRIB_1,
-// 	SFD_CTM_CHAR_ATTRIB_2,
-// 	SFD_CTM_TILES_8,
-// 	SFD_CTM_TILES_16,
-// 	SFD_CTM_MAP_8,
-// 	SFD_CTM_MAP_16,
-// 	SFD_SPD_SPRITES
-// };
 
+signed char ship_row = 3;
+const char MAX_SHIP_ROW=7;
+const char SPRITE_ROW_START = 72;
+const char SPR_ROW_HEIGHT=24;
 
-#define SpriteData ((char *)0x0380)
-#define NUM_SPRITES 1
-#define SPRITE_BYTES_TO_COPY NUM_SPRITES * 64
+const char spr_rowy[] = {
+	SPRITE_ROW_START + SPR_ROW_HEIGHT * 0, SPRITE_ROW_START + SPR_ROW_HEIGHT * 1, SPRITE_ROW_START + SPR_ROW_HEIGHT * 2,
+	SPRITE_ROW_START + SPR_ROW_HEIGHT * 3, SPRITE_ROW_START + SPR_ROW_HEIGHT * 4, SPRITE_ROW_START + SPR_ROW_HEIGHT * 5
+};
 
-char *const SCREEN_ADDR = (char *)0x0400;
-
-
-/** Lives in stdio.c*/
-char *sformat(char *, const char *, int *, bool);
-
-/** If DEBUG is defined, than send output to the text screen. Otherwise, swallow the output.*/
-void out(const char *, ...);
-
-void moveSprWithJoy(unsigned char sprNum, unsigned char joyNum);
-
-sbyte shipRow = 3;
-const int MAX_SHIP_ROW=6;
-const char sprRowY[] = {50+0,50+28,50+56,50+84,50+112,50+140,50+168};
+const char shipX = 180;
 
 int main(void) {
 
 	char lastJoyY=255;
-	char shipX = 160;
 
 	iocharmap(IOCHM_PETSCII_2);
+
 
 	// #if DEBUG=1
 	// 	out(("sprite data is:\n"));
@@ -90,19 +49,25 @@ int main(void) {
 	// 	}
 	// #endif
 
-	out("copying %d sprites...\n", NUM_SPRITES);
+	init_play_screen();
+
+	kernel_clear_screen(VCOL_BLACK, VCOL_RED);
+
+	out("                Tumult!\n");
+
+	// out("copying %d sprites...\n", NUM_SPRITES);
 	memcpy(SpriteData, SPRITE_BYTES, SPRITE_BYTES_TO_COPY);
 
-	out("initializing sprites...\n");
+	//out("initializing sprites...\n");
 	spr_init(SCREEN_ADDR);
 
 
 	char spr0_color=SPRITE_BYTES[63] & 15;
-	out("sprite color=%d\n",spr0_color);
+	//out("sprite color=%d\n",spr0_color);
 	vic.spr_mcolor0=15;
 	vic.spr_mcolor1=2;
 
-	out("showing sprite...\n");
+	//out("showing sprite...\n");
 	/** void spr_set(char sp, bool show, int xpos, int ypos, char image, char color, bool multi, bool xexpand, bool yexpand); **/
 	spr_set(0,true,0,0,(unsigned)(SpriteData)/64,spr0_color,true,false,false);
 
@@ -115,20 +80,30 @@ int main(void) {
 	// 	vic_waitFrame();
 	// }
 	
+	draw_playfield();
 
-	out("waiting forever...\n");
 	while (true) {
+
 		joy_poll(0);
-		shipRow += joyy[0];
-		if (shipRow<0) {
-			shipRow=0;
+		// shipRow += joyy[0];
+		// if (shipRow<0) {
+		// 	shipRow=0;
+		// }
+		// else if (shipRow>MAX_SHIP_ROW) {
+		// 	shipRow = MAX_SHIP_ROW;
+		// }
+		//out("%d %d\n", joyy[0], shipRow);
+		//spr_move(0,shipX,sprRowY[shipRow]);
+		moveSprWithJoy(0,0);
+		if (joyb[0]!=0) {
+			char scrn_row = (ship_row+1)*4;
+			for (char i=0;i<40;i++) {
+				*(SCREEN_ADDR+ (scrn_row * 40) + i) = 0x40; //horiz line
+			}
+
+			kernel_plot(0,0);
+			out("line drawn at line %d        \n", scrn_row);
 		}
-		else if (shipRow>MAX_SHIP_ROW) {
-			shipRow = MAX_SHIP_ROW;
-		}
-		out("%d %d\n", joyy[0], shipRow);
-		spr_move(0,shipX,sprRowY[shipRow]);
-		// moveSprWithJoy(0,0);
 		vic_waitFrame();
 	};
 
@@ -136,8 +111,31 @@ int main(void) {
 }
 
 void moveSprWithJoy(unsigned char sprNum, unsigned char joyNum) {
+	static unsigned char poll_num=0;
+	//static char last_joyx[2] = {0xff, 0xff}, last_joyy[2]={0xff,0xff};
+	//printf("last_joyx[0]==%d last_joyy[0]=%d\n",last_joyx[0],last_joyy[0]);
+
+	if ((poll_num++ % 5) != 0) {
+		return;
+	}
+
 	joy_poll(joyNum);
-	spr_move(sprNum,spr_posx(sprNum) + joyx[joyNum], spr_posy(sprNum)+joyy[joyNum]);
+	// //debounce the joystick y-axis
+	// if (! ((joyx[joyNum] == last_joyx[joyNum]) && (joyy[joyNum] == last_joyy[joyNum])) ) {
+		ship_row += joyy[0];
+		if (ship_row < 0)
+		{
+			ship_row = 0;
+		}
+		else if (ship_row > MAX_SHIP_ROW)
+		{
+			ship_row = MAX_SHIP_ROW;
+		}
+		// out("%d %d\n", joyy[0], shipRow);
+		spr_move(0, shipX, spr_rowy[ship_row]);
+		// last_joyx[joyNum] = joyx[joyNum];
+		// last_joyy[joyNum]=joyy[joyNum];
+	// }
 }
 // void out(const char *fmt, ...) {
 // 	#ifdef DEBUG
@@ -170,9 +168,48 @@ void readSpritePad(char *fname)
 }
 
 void out(const char *fmt, ...) {
-	#ifdef DEBUG
+//	#ifdef DEBUG
 		char buff[50];
 		// const char *fmt = "0123456789012345678901234567890123456789012345678901234567890123456789";
 		sformat(buff, fmt, (int *)&fmt + 1, true);
-	#endif
+//	#endif
 }
+
+void init_play_screen() {
+	vic.color_border = VCOL_WHITE;
+	vic.color_back = VCOL_BLACK;
+
+}
+
+void kernel_clear_screen(VICColors back_color, VICColors char_color) {
+	//vic.color_border=back_color;
+	vic.color_back=back_color;
+	*TEXT_COLOR=char_color;
+
+	__asm {
+		jsr KERNEL_CLRSCN
+	}
+}
+
+void kernel_plot(byte row, byte col) {
+	__asm {
+		ldx row
+		ldy col
+		clc
+		jsr 0xfff0
+	}
+}
+
+void draw_playfield() {
+	for (char i = 0; i < 8; i++) {
+		char scrn_row = (i) * 3+2;
+		for (char j = 0; j < 40; j++)
+		{
+			*(SCREEN_ADDR + (scrn_row * 40) + j) = 0x40; // horiz line
+		}
+		kernel_plot(scrn_row,0);
+		out("row %d\n",scrn_row);
+	}
+
+}
+
