@@ -40,6 +40,8 @@ void kernal_plot(char row, char col);
 
 void draw_playfield();
 
+void move_aliens();
+
 // struct SPDHeader5
 // {
 // 	unsigned char 	mID[3];
