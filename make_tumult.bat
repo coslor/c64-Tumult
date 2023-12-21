@@ -1,0 +1,1 @@
+oscar64 -o="bin\Tumult.prg" "src\Tumult.c"

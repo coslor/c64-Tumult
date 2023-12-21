@@ -7,7 +7,7 @@
 //#include <stdarg.h>
 #include <c64/joystick.h>
 
-#define KERNEL_CLRSCN 0xe544
+#define KERNAL_CLRSCN 0xe544
 
 const char 			NUM_SPRITES = 1;
 const int 			SPRITE_BYTES_TO_COPY = NUM_SPRITES * 64;
@@ -28,7 +28,7 @@ void out(const char *fmt, ...);
 
 void init_play_screen();
 
-void kernel_clear_screen(VICColors back_color, VICColors char_color);
+void kernal_clear_screen(VICColors back_color, VICColors char_color);
 
 void moveSprWithJoy(unsigned char sprNum, unsigned char joyNum);
 
@@ -36,7 +36,7 @@ void readSpritePad(char *fname);
 
 void out(const char *fmt, ...);
 
-void kernel_plot(char row, char col);
+void kernal_plot(char row, char col);
 
 void draw_playfield();
 
