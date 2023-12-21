@@ -29,6 +29,7 @@
 #define DEBUG
 
 #include "includes/Tumult.h"
+#include <stdbool.h>
 
 const char SPRITE_BYTES[] = {
 	#embed  spd_sprites "assets/Tumult.spd"
@@ -183,7 +184,7 @@ void out(const char *fmt, ...) {
 }
 
 void init_play_screen() {
-	vic.color_border = VCOL_WHITE;
+	vic.color_border = VCOL_BLACK;
 	vic.color_back = VCOL_BLACK;
 
 }
