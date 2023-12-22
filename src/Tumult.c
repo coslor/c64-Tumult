@@ -2,8 +2,6 @@
  * 			Tumult! - 	A simple game in the vein of Turmoil for the
  * 						Atari 2600. 
 *******************************************************************************/
-//TODO FIX SPRITE DEF STUFF!
-
 //DONE: define simple sprites for ship, shots & a few enemies
 //TODO: refine sprites
 
