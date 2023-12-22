@@ -14,7 +14,7 @@
 //TODO: make ship x movement work
 
 //TODO: make ship facing work
-//TODO: make the aliens move
+//STARTED: make the aliens move
 //TODO: shooting
 
 //TODO: scoring
@@ -33,9 +33,25 @@
 #include "includes/Tumult.h"
 #include <stdbool.h>
 
+/** define a 256-byte section in the middle of the memory map to hold sprite data*/
+#pragma region( lower, 0x0a00, 0x2000, , , {code, data} )
+#pragma section(sprites, 0)
+#pragma region( sprites, 0x2000, 0x2100, , , {sprites} )
+#pragma region( main, 0x2800, 0xa000, , , {code, data, bss, heap, stack} )
+
+//#pragma data(sprites)
+
 const byte SPRITE_BYTES[] = {
-	#embed  spd_sprites "assets/Tumult.spd"
+	#embed spd_sprites "assets/Tumult.spd"
 };
+
+//#pragma data(data)
+
+// const byte SPRITE_BYTES[] = {
+// 	#embed  spd_sprites "assets/Tumult.spd"
+// };
+//const byte* SPRITE_BYTES = 0x2000;
+
 const byte SPRITE_ATTRIBS[] = {
 	#embed spd_sprites "assets/Tumult.spd"
 };
@@ -54,17 +70,17 @@ const byte spr_rowy[] = {
 	SPRITE_ROW_START + SPR_ROW_HEIGHT * 6
 };
 
-#define SPRITE_BASE 0x300 / 64
-byte SPRITE_IMAGES[] = {SPRITE_BASE, SPRITE_BASE + 1, SPRITE_BASE + 3};
+#define SPRITE_BASE SpriteData / 64
+byte SPRITE_IMAGES[] = {SPRITE_BASE, SPRITE_BASE + 1, SPRITE_BASE + 4};
 
 const byte shipX = 168;
-const byte ship_image[] = {0,3};
+const byte ship_image[] = {12,15};
 
 byte ship_facing = 0;
 
 typedef struct Alien {
 	byte spr_num;
-	byte x;
+	unsigned int x;
 	byte row;
 	byte vel;
 } Alien;
@@ -86,30 +102,38 @@ int main(void) {
 
 	printf("                Tumult!\n");
 
+	////Shouldn't need to do this if we've defined our pragmas, etc correctle
 	//
 	//	Copy sprite data to the proper place in VIC2 memory, specifically SpriteData.
 	//		In this case, we're using the default VIC2 memory setup.
 	//
-	memcpy(SpriteData, SPRITE_BYTES, SPRITE_BYTES_TO_COPY);
+	memcpy((byte *)SpriteData, SPRITE_BYTES, SPRITE_BYTES_TO_COPY);
+
 
 	spr_init(SCREEN_ADDR);
 
 	for (int i=0;i<7;i++) {
 		byte spr0_color = SPRITE_BYTES[63+i] & 15; // byte 64 of sprite data set to sprite color by SpritePad
+		
 	}
 	byte spr0_color=SPRITE_BYTES[63] & 15;	//byte 64 of sprite data set to sprite color by SpritePad
 	vic.spr_mcolor0=15;
 	vic.spr_mcolor1=2;
+	vic.spr_priority=0xff;
 
 	spr_set(0, true, 0, 0, SPRITE_IMAGES[0], SPRITE_BYTES[63] & 15, true, false, false);
 
-	//spr_set(2, true, aliens[0].x, spr_rowy[aliens[0].row], SPRITE_IMAGES[2], SPRITE_BYTES[64 * 2 + 63] & 15, true, false, false);
+	spr_set(aliens[0].spr_num, true, aliens[0].x, spr_rowy[aliens[0].row], SPRITE_BASE+4, SPRITE_BYTES[64 * 4 + 63] & 15, true, false, false);
+
 
 	draw_playfield();
 
 	//while(true);
 
 	while (true) {
+		vic_waitFrame();
+
+		vic.color_border++;
 
 		joy_poll(0);
 		moveSprWithJoy(0,0);
@@ -123,7 +147,9 @@ int main(void) {
 			out("line drawn at line %d        \n", scrn_row);
 		}
 
-		//move_aliens();
+		move_aliens();
+		vic.color_border--;
+
 		vic_waitFrame();
 	};
 
@@ -272,10 +298,14 @@ void draw_playfield() {
 
 
 void move_aliens() {
+	//vic.color_border++;
+
 	for (byte i=0;i<NUM_ALIENS;i++) {
 		aliens[i].x += aliens[i].vel;
 		spr_move(aliens[i].spr_num, aliens[i].x, spr_rowy[aliens[i].row]);
 	}
+
+	//vic.color_border--;
 }
 
 // void display_aliens() {

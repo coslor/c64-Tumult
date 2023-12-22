@@ -7,12 +7,13 @@
 //#include <stdarg.h>
 #include <c64/joystick.h>
 
+
 #define KERNAL_CLRSCN 0xe544
 
-const char 			NUM_SPRITES = 1;
+const char 			NUM_SPRITES = 5;
 const int 			SPRITE_BYTES_TO_COPY = NUM_SPRITES * 64;
 
-#define	SpriteData	(char *)0x0380
+#define	SpriteData	0x2000
 #define	SCREEN_ADDR	(char *)0x0400
 #define	TEXT_COLOR	(char *)0x0286
 
