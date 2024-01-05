@@ -1,7 +1,14 @@
 {
 	"files.associations": {
 		"stdlib.h": "c",
-		"sprites.h": "c"
+		"sprites.h": "c",
+		"math.h": "c",
+		"my_petscii.h": "c",
+		"memmap.h": "c",
+		"bitmap.h": "c",
+		"tumult.h": "c",
+		"vic.h": "c",
+		"types.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "enabled"
 }

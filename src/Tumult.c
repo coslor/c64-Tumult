@@ -2,74 +2,154 @@
  * 			Tumult! - 	A simple game in the vein of Turmoil for the
  * 						Atari 2600. 
 *******************************************************************************/
-//DONE: define simple sprites for ship, shots & a few enemies
-//TODO: refine sprites
 
-//DONE: draw simple test-based playfield
-//TODO: draw cool hires playfield
+/* DONE/TODO
+DONE: define simple sprites for ship, shots & a few enemies
+TODO: refine sprites
 
-//DONE: make ship y movement work
-//TODO: make ship x movement work
+DONE: draw simple test-based playfield
+TODO: draw cool hires playfield
 
-//TODO: make ship facing work
-//STARTED: make the aliens move
-//TODO: shooting
+DONE: make ship y movement work
+TODO: make ship x movement work
 
-//TODO: scoring
-//TODO: simple text-based score display
-//TODO: use (simple?) sprite multiplexing for > 8 sprites onscreen
-//TODO: (depends on multiplexing) upgrade score display using sprites
+TODO: make ship facing work
+STARTED: make the aliens move
+TODO: shooting
 
-//TODO: define pickups
-//TODO: design pickup sprites
-//TODO: implement pickups
+TODO: scoring
+TODO: simple text-based score display
+TODO: use (simple?) sprite multiplexing for > 8 sprites onscreen
+TODO: (depends on multiplexing) upgrade score display using sprites
 
+TODO: define pickups
+TODO: design pickup sprites
+TODO: implement pickups
+*/
 //
 
 #define DEBUG
 
 #include "includes/Tumult.h"
+#include "includes/my_petscii.h"
 #include <stdbool.h>
+#include <c64/memmap.h>
+#include <gfx/bitmap.h>
+#include <oscar.h>
+#include <math.h>
 
-/** define a 256-byte section in the middle of the memory map to hold sprite data*/
-#pragma region( lower, 0x0a00, 0x2000, , , {code, data} )
-#pragma section(sprites, 0)
-#pragma region( sprites, 0x2000, 0x2100, , , {sprites} )
-#pragma region( main, 0x2800, 0xa000, , , {code, data, bss, heap, stack} )
+//#pragma region( lower, 0x0a00, 0x2000, , , {code, data} )
+
+
+
+/* The sprite data read from the file */
+__export static const byte SPRITE_BYTES[] = {
+	#embed spd_sprites "assets/Tumult - Sprites.bin"
+};
+
+//#pragma section(sprites, 0)
+//#pragma region(sprites, 0x1d40, 0x2000, , , {sprites} )
+//#pragma data(sprites)
+//__export static byte SpriteData[0x2c0];
+
+// #pragma section( hires, 0)
+// #pragma region( hires, 0x2000, 0x4000, , , {hires} )
+// #pragma data(hires)
+
+//#pragma region( main, 0x4000, 0xa000, , , {code, data, bss, heap, stack} );
+//#pragma data(data)
+
+//Not sure if the __export is needed, but the tutorial examples recommend it to keep the data
+//	from being optimized away by the linker
+__export static const byte PLAYFIELD_IMG[] = {
+	#embed lzo "assets/tumult-back-010424.map"
+};
+
+__export static const byte PLAYFIELD_SCR[] = {
+	#embed lzo "assets/tumult-back-010424.scr"
+};
+
+
+
+
+//#pragma region( sprites, 0x4000, 0x4100, , , {sprites} )
+
 
 //#pragma data(sprites)
 
-const byte SPRITE_BYTES[] = {
-	#embed spd_sprites "assets/Tumult.spd"
-};
+//char * conat SpriteData = (char *)0x2000;
 
-//#pragma data(data)
-
-// const byte SPRITE_BYTES[] = {
-// 	#embed  spd_sprites "assets/Tumult.spd"
+// Compressed bitmap image and color data
+// static const char ImgHires[] = {
+// 	#embed 8000 0 lzo "../Resources/blumba.mcimg"
 // };
-//const byte* SPRITE_BYTES = 0x2000;
 
-const byte SPRITE_ATTRIBS[] = {
-	#embed spd_sprites "assets/Tumult.spd"
-};
+// static const char ImgScreen[] = {
+// 	#embed 1000 8000 lzo "../Resources/blumba.mcimg"
+// };
+
+// static const char ImgColor[] = {
+// 	#embed 1000 9000 lzo "../Resources/blumba.mcimg"
+// };
+
+/* The sprite attrib data (basically sprite color) */
+// const byte SPRITE_ATTRIBS[] = {
+// 	#embed spd_sprites "assets/Tumult - SpriteAttribs.bin"
+// };
 
 
-byte ship_row = 3;
-//TODO: BUG! we can't have 7 rows, you idiot! We need 1 for the ship & 1 for the bullet, leaving *FIVE* rows available. 
-//TODO Rewrite all of the playfield code to have only 6 rows.
-const byte MAX_SHIP_ROW=6;
-const byte SPRITE_ROW_START = 80;
-const byte SPR_ROW_HEIGHT=24;
+// static const byte PLAYFIELD_COLOR[] = {
+// 	#embed lzo "assets/grid-hires-red.scr"
 
+// };
+
+
+// Color RAM
+static char *ColorMem = (char *)0xd800;
+
+
+// Place bitmap memory underneath kernal ROM
+char *Hires	= (char *)0xe000;
+
+// Place cell color map underneath IO
+char *Screen	= (char *)0xd000;
+char *Color		= (char *)0xd800;
+//const char *SpriteData	= SPRITE_BYTES; //(char *)0x2000;
+char *Sprites 	= (char *)0xc000;
+
+
+// #define Color	((char *)0xd000)
+// #define Hires	((char *)0x4000)
+
+//Bitmap		Screen;
+
+
+
+#define NUM_FRAMES_BETWEEN_MOVE_SHIP 5
+
+signed char ship_row = 3;
+const byte MAX_SHIP_ROW=5;
+
+const byte SPRITE_ROW_START = 52 + 32;
+//#define SPRITE_ROW_START 32
+//const byte SPRITE_ROW_START = 32;
+const byte SPR_ROW_HEIGHT=28;
+
+/* Starting Y coordinate of row n */
 const byte spr_rowy[] = {
 	SPRITE_ROW_START + SPR_ROW_HEIGHT * 0, SPRITE_ROW_START + SPR_ROW_HEIGHT * 1, SPRITE_ROW_START + SPR_ROW_HEIGHT * 2,
 	SPRITE_ROW_START + SPR_ROW_HEIGHT * 3, SPRITE_ROW_START + SPR_ROW_HEIGHT * 4, SPRITE_ROW_START + SPR_ROW_HEIGHT * 5,
 	SPRITE_ROW_START + SPR_ROW_HEIGHT * 6
 };
 
+/* Handle to the start of the sprites. SPRITE_BASE=(address % 16384) / 64 */
 #define SPRITE_BASE SpriteData / 64
-byte SPRITE_IMAGES[] = {SPRITE_BASE, SPRITE_BASE + 1, SPRITE_BASE + 4};
+//const byte SPRITE_BASE = SpriteData / 64;
+
+/* Handles to the sprite data for each sprite. That is, the sprite handle to display for sprite n. See SPRITE_BASE. */
+//byte SPRITE_IMAGES[] = {SPRITE_BASE, SPRITE_BASE + 1, SPRITE_BASE + 4};
+char SPRITE_IMAGES[3];
+
 
 const byte shipX = 168;
 const byte ship_image[] = {12,15};
@@ -83,29 +163,73 @@ typedef struct Alien {
 	byte vel;
 } Alien;
 
+
 #define NUM_ALIENS 1
-Alien aliens[NUM_ALIENS] = { {4,-50,0,2}};
+Alien aliens[] = { {4,-50,0,2}};
 
 int main(void) {
 
-	byte lastJoyY=255;
+	vic.color_border = VCOL_BLACK;
+	vic.color_back = VCOL_BLACK;
 
+	SPRITE_IMAGES[0] = 128;//(byte)SPRITE_BASE;
+	SPRITE_IMAGES[1] = 129;//SPRITE_BASE+1;
+	// SPRITE_IMAGES[2] = (byte)(SPRITE_BASE + 4);
+
+
+		// Install trampoline to keep system running with ROM paged out
+	mmap_trampoline();
+
+	// Page in RAM
+	mmap_set(MMAP_RAM);
+
+	// Expand hires and first color map
+	oscar_expand_lzo(Hires, PLAYFIELD_IMG);
+	oscar_expand_lzo(Screen, PLAYFIELD_SCR);
+
+	//oscar_expand_lzo(Sprites,SPRITE_BYTES);
+	memcpy(Sprites,SPRITE_BYTES,SPRITE_BYTES_TO_COPY);
+	vic.color_border++;
+	
+	//Sprite attribs are just fine where they are; we'll use them later.
+	//oscar_expand_lzo(Sprite,SPRITE_BYTES,SPRITE_BYTES_TO_COPY);
+
+	// Turn IO space back on
+	mmap_set(MMAP_ROM);
+
+	// Expand color attributes
+	// oscar_expand_lzo(Color, ImgColor);
+
+	// Set hires multicolor mode
+	//vic_setmode(VICM_HIRES, Screen, Hires);
+
+
+
+	//mmap_set(MMAP_ALL_ROM);
+
+	set_text_mode();
+
+	//printf("Waiting forever now\n");
+	//while(1);
+
+	byte lastJoyY=255;
 
 	iocharmap(IOCHM_PETSCII_2);
 
-
 	init_play_screen();
 
-	kernal_clear_screen(VCOL_BLACK, VCOL_RED);
+	// kernal_clear_screen(VCOL_BLACK, VCOL_RED);
 
-	printf("                Tumult!\n");
+	// printf("                Tumult!\n");
 
-	////Shouldn't need to do this if we've defined our pragmas, etc correctle
-	//
-	//	Copy sprite data to the proper place in VIC2 memory, specifically SpriteData.
-	//		In this case, we're using the default VIC2 memory setup.
-	//
-	memcpy((byte *)SpriteData, SPRITE_BYTES, SPRITE_BYTES_TO_COPY);
+
+	// //	Copy sprite data to the proper place in VIC2 memory, specifically SpriteData.
+	// //		In this case, we're using the default VIC2 memory setup.
+	// //
+	//memcpy((byte *)SpriteData, SPRITE_BYTES, SPRITE_BYTES_TO_COPY);
+	// for (int i=0;i<64*11;i++) {
+	// 	SPRITE_BYTES_TO_COPY[i]=0xff;
+	// }
 
 
 	spr_init(SCREEN_ADDR);
@@ -121,45 +245,60 @@ int main(void) {
 
 	spr_set(0, true, 0, 0, SPRITE_IMAGES[0], SPRITE_BYTES[63] & 15, true, false, false);
 
-	spr_set(aliens[0].spr_num, true, aliens[0].x, spr_rowy[aliens[0].row], SPRITE_BASE+4, SPRITE_BYTES[64 * 4 + 63] & 15, true, false, false);
+	// spr_set(aliens[0].spr_num, true, aliens[0].x, spr_rowy[aliens[0].row], SPRITE_BASE+4, SPRITE_BYTES[64 * 4 + 63] & 15, true, false, false);
 
 
-	draw_playfield();
+	//draw_playfield();
 
 	//while(true);
+
 
 	while (true) {
 		vic_waitFrame();
 
-		vic.color_border++;
+		//vic.color_border++;
+
 
 		joy_poll(0);
 		moveSprWithJoy(0,0);
 		if (joyb[0]!=0) {
 			byte scrn_row = (ship_row+1)*4;
 			for (byte i=0;i<40;i++) {
-				*(SCREEN_ADDR+ (scrn_row * 40) + i) = 0x40; //horiz line
+				*(SCREEN_ADDR+ (scrn_row * 40) + i) = CHAR_HORIZ_LINE; //horiz line
 			}
 
-			kernal_plot(0,0);
-			out("line drawn at line %d        \n", scrn_row);
+			// kernal_plot(0,0);
+			// out("line drawn at line %d        \n", scrn_row);
 		}
 
 		move_aliens();
-		vic.color_border--;
 
-		vic_waitFrame();
+//while(true);
+
+		//vic_waitFrame();
 	};
 
+	vic.color_border++;
 	return 0;
 }
 
+void die()
+{
+	set_text_mode();
+
+	getch();
+	set_text_mode();
+}
+
+/* Read the joystick and move the ship up or down 1 row. Updates ((50 or 60) / NUM_FRAMES_BETWEEN_MOVE_SHIP) times/second,
+	so this 
+ */
 void moveSprWithJoy(byte sprNum, byte joyNum) {
-	static byte poll_num=0;
+	static int poll_num=0;
 	//static char last_joyx[2] = {0xff, 0xff}, last_joyy[2]={0xff,0xff};
 	//printf("last_joyx[0]==%d last_joyy[0]=%d\n",last_joyx[0],last_joyy[0]);
 
-	if ((poll_num++ % 5) != 0) {
+	if ((poll_num++ % NUM_FRAMES_BETWEEN_MOVE_SHIP) != 0) {
 		return;
 	}
 
@@ -176,8 +315,8 @@ void moveSprWithJoy(byte sprNum, byte joyNum) {
 			ship_row = MAX_SHIP_ROW;
 		}
 		// out("%d %d\n", joyy[0], shipRow);
-		kernal_plot(0,0);
-		out("x=%d y=%d  ",shipX,spr_rowy[ship_row]);
+		// kernal_plot(0,0);
+		// out("x=%d y=%d  ",shipX,spr_rowy[ship_row]);
 
 		spr_move(0, shipX, spr_rowy[ship_row]);
 
@@ -217,6 +356,7 @@ void readSpritePad(byte *fname)
 	// // mLimit = 0;
 }
 
+/* Send a debug message to the screen */
 void out(const char *fmt, ...) {
 //	#ifdef DEBUG
 		char buff[50];
@@ -226,11 +366,19 @@ void out(const char *fmt, ...) {
 }
 
 void init_play_screen() {
+	//Set VIC to HIRES & set bank & addresses for HIRES & TEXT screens in the appropriate bank
+	vic_setmode(VICM_HIRES, Screen, Hires);
+
 	vic.color_border = VCOL_BLACK;
 	vic.color_back = VCOL_BLACK;
-
 }
 
+/**
+ * 	Set the VIC background color, than call the Kernal routine at $e544, which clears the screen and fills color memory with the char color. 
+ * 		Sets the link table entries correctly. 
+ * 
+ *	NOTE: this routine depends on $0288 holding the high byte of current screen memory.
+*/
 void kernal_clear_screen(VICColors back_color, VICColors char_color) {
 	//vic.color_border=back_color;
 	vic.color_back=back_color;
@@ -254,45 +402,46 @@ void kernal_plot(byte row, byte col) {
  * 	Draw the playfield using PETSCII chars.
  * 		//TODO: maybe use hires graphics for this instead?
 */
-void draw_playfield() {
-	for (int row=4; row<24; row++) {
-		*(SCREEN_ADDR + row*40) 			= 0x5d; //vert line
-		*(SCREEN_ADDR + row * 40 + 39) 		= 0x5d; // vert line
-	}
+// void draw_playfield() {
+// 	//Yes, this code could be more efficient. So what, it only runs once & is basically
+// 	//	instant anyway!
 
-	//draw top & bottom horiz lines
-	for (char i=1;i<39;i++) {
-		*(SCREEN_ADDR + 120 + i) 			= 0x40; // horiz line
-		*(SCREEN_ADDR + 24*40 + i)			= 0x40; // horiz line
-	}
+// 	for (int row=4; row<24; row++) {
+// 		*(SCREEN_ADDR + row*40) 			= LEFT_VERT_LINE_CHAR;
+// 		*(SCREEN_ADDR + row * 40 + 39) 		= RIGHT_VERT_LINE_CHAR;
+// 	}
 
-	//draw horiz lines in between, leaving a gap between cols 19-21
-	for (char i = 1; i < 7; i++) {
-		char scrn_row = (i) * 3+2;
-		int row_offset = ((scrn_row+1) * 40);
-		for (char j = 1; j < 18; j++)
-		{
-			*(SCREEN_ADDR + row_offset + j) = 0x40; // horiz line
-		}
-		for (char j = 21; j < 39; j++)
-		{
-			*(SCREEN_ADDR + row_offset + j) = 0x40; // horiz line
-		}
+// 	//draw top & bottom horiz lines
+// 	for (char i=1;i<39;i++) {
+// 		*(SCREEN_ADDR + 120 + i) 			= UPPER_HORIZ_LINE_CHAR;
+// 		*(SCREEN_ADDR + 24*40 + i)			= LOWER_HORIZ_LINE_CHAR;
+// 	}
 
-		//draw horiz connectors for each row
-		*(SCREEN_ADDR + row_offset) 		= 0x6b;		 // left connector
-		*(SCREEN_ADDR + row_offset + 39) 	= 0x73; // right connector
+// 	//draw horiz lines in between, leaving a gap between cols 19-21
+// 	for (char i = 1; i <= MAX_SHIP_ROW; i++) {
+// 		char scrn_row = i*3;
+// 		int row_offset = ((scrn_row+1) * 40);
+// 		for (char j = 1; j < 18; j++)
+// 		{
+// 			*(SCREEN_ADDR + row_offset + j) = JUNCTION_HORIZ_LINE_CHAR;
+// 		}
+// 		for (char j = 21; j < 39; j++)
+// 		{
+// 			*(SCREEN_ADDR + row_offset + j) = JUNCTION_HORIZ_LINE_CHAR;
+// 		}
 
-		//kernal_plot(scrn_row,0);
-		//out("row %d\n",scrn_row);
-	}
+// 		//draw horiz connectors for each row
+// 		*(SCREEN_ADDR + row_offset) 		= RIGHT_JUNCTION_CHAR;
+// 		*(SCREEN_ADDR + row_offset + 39) 	= LEFT_JUNCTION_CHAR;
+// 	}
 
-	//draw corners
-	*(SCREEN_ADDR + 3*40) 		= 0x70; //upper-left corner
-	*(SCREEN_ADDR + 3*40 + 39) 	= 0x6e; //upper-right corner
-	*(SCREEN_ADDR + 24*40)		= 0x6d; //lower-left corner
-	*(SCREEN_ADDR + 24*40 + 39)	= 0x7d; //lower-right corner
-}
+// 	//int a = CHAR_HORIZ_LINE
+// 	//draw corners
+// 	*(SCREEN_ADDR + 3*40) 		= UL_CORNER_CHAR;
+// 	*(SCREEN_ADDR + 3*40 + 39) 	= UR_CORNER_CHAR;
+// 	*(SCREEN_ADDR + 24*40)		= LL_CORNER_CHAR;
+// 	*(SCREEN_ADDR + 24*40 + 39)	= LR_CORNER_CHAR;
+// }
 
 
 void move_aliens() {
@@ -311,3 +460,7 @@ void move_aliens() {
 // 		spr_move(aliens[i].spr_num, aliens[i].x, spr_rowy[aliens[i].row]);
 // 	}
 // }
+
+void set_text_mode() {
+	vic_setmode(VICM_TEXT, (char *)0x0400, (char *)0x1000);
+}

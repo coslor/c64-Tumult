@@ -10,10 +10,10 @@
 
 #define KERNAL_CLRSCN 0xe544
 
-const char 			NUM_SPRITES = 5;
+const char 			NUM_SPRITES = 11;
 const int 			SPRITE_BYTES_TO_COPY = NUM_SPRITES * 64;
 
-#define	SpriteData	0x2000
+//#define	SpriteData	0x2000
 #define	SCREEN_ADDR	(char *)0x0400
 #define	TEXT_COLOR	(char *)0x0286
 
@@ -39,7 +39,7 @@ void out(const char *fmt, ...);
 
 void kernal_plot(char row, char col);
 
-void draw_playfield();
+//void draw_playfield();
 
 void move_aliens();
 
@@ -54,3 +54,43 @@ void move_aliens();
 // 	unsigned char 	mColors[3];
 // 	unsigned char 	mSpriteOverlayDist, mTileOverlayDist;
 // };
+
+
+/* PETSCII chars to draw playfield */
+// #define LEFT_VERT_LINE_CHAR		CHAR_VERT_LINE
+// #define RIGHT_VERT_LINE_CHAR	CHAR_VERT_LINE
+// #define UPPER_HORIZ_LINE_CHAR	CHAR_HORIZ_LINE
+// #define LOWER_HORIZ_LINE_CHAR	CHAR_HORIZ_LINE
+// #define UL_CORNER_CHAR			CHAR_UPPER_LEFT_CORNER
+// #define UR_CORNER_CHAR			CHAR_UPPER_RIGHT_CORNER
+// #define LL_CORNER_CHAR			CHAR_LOWER_LEFT_CORNER
+// #define LR_CORNER_CHAR			CHAR_LOWER_RIGHT_CORNER
+// #define LEFT_JUNCTION_CHAR		CHAR_LEFT_JUNCTION
+// #define RIGHT_JUNCTION_CHAR		CHAR_RIGHT_JUNCTION
+// #define JUNCTION_HORIZ_LINE_CHAR CHAR_HORIZ_LINE
+
+#define LEFT_VERT_LINE_CHAR		CHAR_INVERSE_SPACE
+#define RIGHT_VERT_LINE_CHAR	CHAR_INVERSE_SPACE
+
+// #define UPPER_HORIZ_LINE_CHAR	CHAR_INVERSE_SPACE
+// #define LOWER_HORIZ_LINE_CHAR	CHAR_INVERSE_SPACE
+#define UPPER_HORIZ_LINE_CHAR	CHAR_INVERSE_SPACE
+#define LOWER_HORIZ_LINE_CHAR	CHAR_INVERSE_SPACE
+
+#define UL_CORNER_CHAR			CHAR_INVERSE_SPACE
+#define UR_CORNER_CHAR			CHAR_INVERSE_SPACE
+#define LL_CORNER_CHAR			CHAR_INVERSE_SPACE
+#define LR_CORNER_CHAR			CHAR_INVERSE_SPACE
+#define LEFT_JUNCTION			CHAR_INVERSE_SPACE
+#define RIGHT_JUNCTION			CHAR_INVERSE_SPACE
+
+//#define JUNCTION_HORIZ_LINE_CHAR CHAR_INVERSE_SPACE
+#define JUNCTION_HORIZ_LINE_CHAR CHAR_HORIZ_LINE
+
+#define LEFT_JUNCTION_CHAR		CHAR_INVERSE_SPACE
+#define RIGHT_JUNCTION_CHAR		CHAR_INVERSE_SPACE
+#define JUNCTION_HORIZ_LINE_CHAR CHAR_INVERSE_SPACE
+
+
+void set_text_mode();
+void die();

@@ -1,1 +1,1 @@
-oscar64 -o="bin\Tumult.prg" "src\Tumult.c"
+oscar64 -o="bin\Tumult.prg" -v2 -g -O0 "src\Tumult.c" >bin\Tumult-out.txt

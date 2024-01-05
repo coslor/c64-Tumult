@@ -1,0 +1,248 @@
+Starting oscar64 1.26.228.0
+Compiling "C:/Users/chris/Projects/oscar/Tumult!/src/Tumult.c"
+Including "C:/Users/chris/Projects/oscar/Tumult!/src/includes/Tumult.h"
+Including "C:/Users/chris/oscar64/include/c64/vic.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/c64/sprites.h"
+Including "C:/Users/chris/oscar64/include/c64/vic.h"
+Including "C:/Users/chris/oscar64/include/string.h"
+Including "C:/Users/chris/oscar64/include/conio.h"
+Including "C:/Users/chris/oscar64/include/stdio.h"
+Including "C:/Users/chris/oscar64/include/stdlib.h"
+Including "C:/Users/chris/oscar64/include/stdlib.h"
+Including "C:/Users/chris/oscar64/include/c64/joystick.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/Projects/oscar/Tumult!/src/includes/my_petscii.h"
+Including "C:/Users/chris/oscar64/include/stdbool.h"
+Including "C:/Users/chris/oscar64/include/c64/memmap.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/gfx/bitmap.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/oscar.h"
+Embedding "C:/Users/chris/Projects/oscar/Tumult!/assets/Tumult - Sprites.bin"
+Embedding "C:/Users/chris/Projects/oscar/Tumult!/assets/grid-hires-dont-eat-food-gaps.map"
+Embedding "C:/Users/chris/Projects/oscar/Tumult!/assets/grid-hires-dont-eat-food-gaps.scr"
+Compiling "C:/Users/chris/oscar64/include/crt.c"
+Including "C:/Users/chris/oscar64/include/crt.h"
+Compiling "C:/Users/chris/oscar64/include/c64/vic.c"
+Including "C:/Users/chris/oscar64/include/c64/vic.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/c64/cia.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Compiling "C:/Users/chris/oscar64/include/c64/sprites.c"
+Including "C:/Users/chris/oscar64/include/c64/sprites.h"
+Including "C:/Users/chris/oscar64/include/c64/vic.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/c64/rasterirq.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Compiling "C:/Users/chris/oscar64/include/string.c"
+Including "C:/Users/chris/oscar64/include/string.h"
+Compiling "C:/Users/chris/oscar64/include/conio.c"
+Including "C:/Users/chris/oscar64/include/conio.h"
+Compiling "C:/Users/chris/oscar64/include/stdlib.c"
+Including "C:/Users/chris/oscar64/include/stdlib.h"
+Including "C:/Users/chris/oscar64/include/string.h"
+Including "C:/Users/chris/oscar64/include/stdio.h"
+Including "C:/Users/chris/oscar64/include/stdlib.h"
+Including "C:/Users/chris/oscar64/include/math.h"
+Including "C:/Users/chris/oscar64/include/crt.h"
+Compiling "C:/Users/chris/oscar64/include/stdio.c"
+Including "C:/Users/chris/oscar64/include/stdio.h"
+Including "C:/Users/chris/oscar64/include/stdlib.h"
+Including "C:/Users/chris/oscar64/include/conio.h"
+Including "C:/Users/chris/oscar64/include/stdlib.h"
+Compiling "C:/Users/chris/oscar64/include/c64/joystick.c"
+Including "C:/Users/chris/oscar64/include/c64/joystick.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Compiling "C:/Users/chris/oscar64/include/c64/memmap.c"
+Including "C:/Users/chris/oscar64/include/c64/memmap.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Compiling "C:/Users/chris/oscar64/include/gfx/bitmap.c"
+Including "C:/Users/chris/oscar64/include/gfx/bitmap.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/gfx/tinyfont.h"
+Including "C:/Users/chris/oscar64/include/stdlib.h"
+Including "C:/Users/chris/oscar64/include/c64/asm6502.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/string.h"
+Including "C:/Users/chris/oscar64/include/fixmath.h"
+Compiling "C:/Users/chris/oscar64/include/oscar.c"
+Including "C:/Users/chris/oscar64/include/oscar.h"
+Compiling "C:/Users/chris/oscar64/include/c64/cia.c"
+Including "C:/Users/chris/oscar64/include/c64/cia.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Compiling "C:/Users/chris/oscar64/include/c64/rasterirq.c"
+Including "C:/Users/chris/oscar64/include/c64/rasterirq.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/c64/vic.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/c64/cia.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/c64/asm6502.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Including "C:/Users/chris/oscar64/include/stdlib.h"
+Compiling "C:/Users/chris/oscar64/include/math.c"
+Including "C:/Users/chris/oscar64/include/math.h"
+Including "C:/Users/chris/oscar64/include/stdio.h"
+Including "C:/Users/chris/oscar64/include/stdlib.h"
+Compiling "C:/Users/chris/oscar64/include/gfx/tinyfont.c"
+Including "C:/Users/chris/oscar64/include/gfx/tinyfont.h"
+Compiling "C:/Users/chris/oscar64/include/c64/asm6502.c"
+Including "C:/Users/chris/oscar64/include/c64/asm6502.h"
+Including "C:/Users/chris/oscar64/include/c64/types.h"
+Compiling "C:/Users/chris/oscar64/include/fixmath.c"
+Including "C:/Users/chris/oscar64/include/fixmath.h"
+Global analyzer
+Generate intermediate code
+Generate intermediate code <main>
+Generate intermediate code <mmap_trampoline>
+Optimize intermediate code <mmap_trampoline>
+Generate intermediate code <mmap_set>
+Optimize intermediate code <mmap_set>
+Generate intermediate code <oscar_expand_lzo>
+Optimize intermediate code <oscar_expand_lzo>
+Generate intermediate code <vic_setmode>
+Optimize intermediate code <vic_setmode>
+Generate intermediate code <set_text_mode>
+Optimize intermediate code <set_text_mode>
+Generate intermediate code <printf>
+Generate intermediate code <sformat>
+Generate intermediate code <puts>
+Optimize intermediate code <puts>
+Generate intermediate code <nformi>
+Optimize intermediate code <nformi>
+Generate intermediate code <nforml>
+Optimize intermediate code <nforml>
+Generate intermediate code <nformf>
+Generate intermediate code <isinf>
+Optimize intermediate code <isinf>
+Optimize intermediate code <nformf>
+Optimize intermediate code <sformat>
+Optimize intermediate code <printf>
+Generate intermediate code <iocharmap>
+Generate intermediate code <putch>
+Optimize intermediate code <putch>
+Optimize intermediate code <iocharmap>
+Generate intermediate code <init_play_screen>
+Optimize intermediate code <init_play_screen>
+Generate intermediate code <kernal_clear_screen>
+Optimize intermediate code <kernal_clear_screen>
+Generate intermediate code <spr_init>
+Optimize intermediate code <spr_init>
+Generate intermediate code <vic_waitFrame>
+Optimize intermediate code <vic_waitFrame>
+Generate intermediate code <joy_poll>
+Optimize intermediate code <joy_poll>
+Generate intermediate code <moveSprWithJoy>
+Generate intermediate code <kernal_plot>
+Optimize intermediate code <kernal_plot>
+Generate intermediate code <out>
+Optimize intermediate code <out>
+Generate intermediate code <spr_move>
+Optimize intermediate code <spr_move>
+Optimize intermediate code <moveSprWithJoy>
+Generate intermediate code <move_aliens>
+Optimize intermediate code <move_aliens>
+Optimize intermediate code <main>
+Optimize static variable usage
+Generate native code
+Generate native code <mmap_trampoline>
+Generate native code <mmap_set>
+Generate native code <oscar_expand_lzo>
+Generate native code <vic_setmode>
+Generate native code <set_text_mode>
+Generate native code <puts>
+Generate native code <nformi>
+Generate native code <nforml>
+Generate native code <isinf>
+Generate native code <nformf>
+Generate native code <sformat>
+Generate native code <printf>
+Generate native code <putch>
+Generate native code <iocharmap>
+Generate native code <init_play_screen>
+Generate native code <kernal_clear_screen>
+Generate native code <spr_init>
+Generate native code <vic_waitFrame>
+Generate native code <joy_poll>
+Generate native code <kernal_plot>
+Generate native code <out>
+Generate native code <spr_move>
+Generate native code <moveSprWithJoy>
+Generate native code <move_aliens>
+Generate native code <main>
+Assemble native code <mmap_trampoline>
+Assemble native code <mmap_set>
+Assemble native code <oscar_expand_lzo>
+Assemble native code <vic_setmode>
+Assemble native code <set_text_mode>
+Assemble native code <puts>
+Assemble native code <nformi>
+Assemble native code <nforml>
+Assemble native code <isinf>
+Assemble native code <nformf>
+Assemble native code <sformat>
+Assemble native code <printf>
+Assemble native code <putch>
+Assemble native code <iocharmap>
+Assemble native code <init_play_screen>
+Assemble native code <kernal_clear_screen>
+Assemble native code <spr_init>
+Assemble native code <vic_waitFrame>
+Assemble native code <joy_poll>
+Assemble native code <kernal_plot>
+Assemble native code <out>
+Assemble native code <spr_move>
+Assemble native code <moveSprWithJoy>
+Assemble native code <move_aliens>
+Assemble native code <main>
+Link executable
+Placed object <ZeroStart> $00f7 - $00f7
+Placed object <ZeroEnd> $00f7 - $00f7
+Placed object <startup> $0801 - $0863
+Placed object <main> $0880 - $0910
+Placed object <mmap_trampoline> $0910 - $0925
+Placed object <NMITrampoline> $0925 - $093c
+Placed object <DoneTrampoline> $093c - $0943
+Placed object <IRQTrampoline> $0943 - $095a
+Placed object <mmap_set> $095a - $0966
+Placed object <oscar_expand_lzo> $0966 - $09f9
+Placed object <vic_setmode> $09f9 - $0a50
+Placed object <set_text_mode> $0a50 - $0a63
+Placed object <printf> $0a63 - $0a91
+Placed object <sformat> $0a91 - $102e
+Placed object <puts> $102e - $1040
+Placed object <putpch> $1040 - $1083
+Placed object <nformi> $1083 - $122d
+Placed object <nforml> $122d - $142b
+Placed object <nformf> $142b - $1a66
+Placed object <isinf> $1a66 - $1a86
+Placed object <freg> $1a9b - $1ae0
+Placed object <faddsub> $1ae0 - $1bc7
+Placed object <fmul> $1bc7 - $1c68
+Placed object <fmul8> $1c68 - $1c96
+Placed object <fdiv> $1c96 - $1d44
+Placed object <divs16> $1d44 - $1d62
+Placed object <negaccu> $1d62 - $1d70
+Placed object <negtmp> $1d70 - $1d7e
+Placed object <divmod> $1d7e - $1e03
+Placed object <mods16> $1e03 - $1e2c
+Placed object <f32_to_i16> $1e2c - $1e6e
+Placed object <sint16_to_float> $1e6e - $1e8c
+Placed object <uint16_to_float> $1e8c - $1eb9
+Placed object <divmod32> $1eb9 - $1f4f
+Placed object <spentry> $1f4f - $1f50
+Placed object <PLAYFIELD_IMG> $1f50 - $224e
+Placed object <Screen> $224e - $2250
+Placed object <PLAYFIELD_SCR> $2250 - $227b
+Placed object <giocharmap> $227b - $227c
+Placed object <fround5> $227c - $2298
+Placed object <BSSStart> $2298 - $2298
+Placed object <BSSEnd> $2298 - $2298
+Placed object <SPRITE_IMAGES> $2298 - $229b
+Placed object <StackEnd> $229b - $229b
+Writing <bin\Tumult.prg>
+Writing <bin\Tumult.map>
+Writing <bin\Tumult.asm>
+Writing <bin\Tumult.lbl>
+Writing <bin\Tumult.int>
