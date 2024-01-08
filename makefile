@@ -3,7 +3,7 @@
 
  CC			=c:/Users/chris/oscar64/bin/oscar64.exe
 
-CFLAGS=-g -O0 -n
+CFLAGS=-g -O0 -n -v
 
 # OBJDIR=bin
 # vpath %.c src

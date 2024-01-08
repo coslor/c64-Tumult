@@ -8,7 +8,8 @@
 		"bitmap.h": "c",
 		"tumult.h": "c",
 		"vic.h": "c",
-		"types.h": "c"
+		"types.h": "c",
+		"stdint.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "enabled"
 }
