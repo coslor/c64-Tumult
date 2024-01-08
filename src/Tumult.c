@@ -37,27 +37,82 @@ TODO: implement pickups
 #include <gfx/bitmap.h>
 #include <oscar.h>
 #include <math.h>
+#include <c64/vic.h>
+#include <stdint.h>
 
 //#pragma region( lower, 0x0a00, 0x2000, , , {code, data} )
 
+//	We want our Hires screen to be at:
+//		8192=0x2000=Bit 2 set to 1 in $d018 when in Hires mode
+//		Note that we don't have much choice here-- our choices are 0 or 8192/$2000
+//
+//	We don't want to use any character set right now
+//
+//	We want our screen to live...right where it is now, at:
+//		1024 = $400 = bits 4-7 of $d018 need to be 0001 
+//
+//	We want to put our sprites at:
+//		8192-(sprite count*64) = 8192 - 11 * 64 = 7488 = 0x1d40 = sprite bank 117
+//	**BUT**The VIC2 ALWAYS sees ROM at ranges $1000-100ff and $9000-9fff
+//		...in other words, (BANK_START+1024) for banks 0 and 2
+//	SO, let's put the sprites at:
+//		$900 = $24 * $40
+//			
 
+//TODO add the lower section stuff
+//#pragma region( lower, 0x0a00, 0x1d40, , , {code, data} )
 
 /* The sprite data read from the file */
 __export static const byte SPRITE_BYTES[] = {
-	#embed spd_sprites "assets/Tumult - Sprites.bin"
+// 	#embed spd_sprites "assets/Tumult - Sprites.bin"
+// };
+	0x00,0x00,0x00,0x0A,0x40,0x00,0xEA,0x50,0x00,0xFF,0xD4,0x00,0xEA,0xA0,0x00,0x0A,
+	0x00,0x00,0x0A,0x01,0x00,0x0A,0x2A,0x40,0x2A,0xAB,0x90,0xAA,0xAF,0xEB,0xAA,0xAF,
+	0xEB,0xAA,0xAF,0xEB,0x2A,0xAB,0xA0,0x0A,0x2A,0x80,0x0A,0x02,0x00,0x0A,0x40,0x00,
+	0xEA,0x90,0x00,0xFF,0xE8,0x00,0xEA,0xA0,0x00,0x0A,0x80,0x00,0x00,0x00,0x00,0x8B
 };
 
-//#pragma section(sprites, 0)
-//#pragma region(sprites, 0x1d40, 0x2000, , , {sprites} )
-//#pragma data(sprites)
+//REMINDER: startup section takes $800-$863
+
+//0x6000-(11*64)=0x6000-704=0x6000-0x2c0= 
+#define SPRITE_START 0x5d40
+
+// #pragma section(lower_sec, 0)
+// #pragma region(lower_reg, 0x8a0, 0x4000,,,{code, data})
+
+// #pragma section(middle_sec, 0)
+// #pragma region(middle_reg, 0x4000, 0x4400,,,{code, data})
+
+#pragma region( lower, 0x0a00, 0x4000, , , {code, data} )
+
+#pragma section(text_sec,0)
+#pragma region(text_reg, 0x4400,0x4800,,,{text_sec})
+//#pragma data(text_sec)
+//__export char TextScreen[1024];
+__export char *Text=(char *)0x4400;
+
+// #pragma section(middle_sec2, 0)
+// #pragma region(middle_reg2, 0x4800, SPRITE_START,,,{code, data})
+
+#pragma section(sprite_sec, 0)
+#pragma region(sprite_reg, SPRITE_START, 0x6000, , , {sprite_sec} )
+//#pragma data(sprite_sec)
+//__export char Sprites[11][64];
+__export char *Sprites=(char *)SPRITE_START;
+
+#pragma section( hires_sec, 0)
+#pragma region( hires_reg, 0x6000, 0x8000, , , {hires_sec} )
+//#pragma data(hires_sec)
+//__export char HiresScreen[0x1000];
+__export char *Hires = (char *)0x6000;
+
+//#pragma data(cassette_buff_sec)
 //__export static byte SpriteData[0x2c0];
+//__export static byte *SpriteData[64];
+//__export static char SpriteData[1];
 
-// #pragma section( hires, 0)
-// #pragma region( hires, 0x2000, 0x4000, , , {hires} )
-// #pragma data(hires)
-
-//#pragma region( main, 0x4000, 0xa000, , , {code, data, bss, heap, stack} );
-//#pragma data(data)
+#pragma region( main, 0x8000, 0xa000, , , {code, data, bss, heap, stack} );
+#pragma data(data)
 
 //Not sure if the __export is needed, but the tutorial examples recommend it to keep the data
 //	from being optimized away by the linker
@@ -107,17 +162,14 @@ __export static const byte PLAYFIELD_SCR[] = {
 // Color RAM
 static char *ColorMem = (char *)0xd800;
 
+//char *Hires	= (char *)0x2000;
 
-// Place bitmap memory underneath kernal ROM
-char *Hires	= (char *)0xe000;
-
-// Place cell color map underneath IO
-char *Screen	= (char *)0xd000;
+//char *Screen	= (char *)0x0400;
 char *Color		= (char *)0xd800;
 //const char *SpriteData	= SPRITE_BYTES; //(char *)0x2000;
-char *Sprites 	= (char *)0xc000;
+//char *Sprites 	= (char *)832; //(char *)0x1d40;
 
-
+const byte bank=1;
 // #define Color	((char *)0xd000)
 // #define Hires	((char *)0x4000)
 
@@ -163,60 +215,71 @@ typedef struct Alien {
 	byte vel;
 } Alien;
 
+inline int BANK_ADDR(int bank,int offset){ return bank*0x4000+offset; }
 
 #define NUM_ALIENS 1
 Alien aliens[] = { {4,-50,0,2}};
 
 int main(void) {
 
-	vic.color_border = VCOL_BLACK;
-	vic.color_back = VCOL_BLACK;
+	// vic.color_border = VCOL_BLACK;
+	// vic.color_back = VCOL_BLACK;
 
-	SPRITE_IMAGES[0] = 128;//(byte)SPRITE_BASE;
-	SPRITE_IMAGES[1] = 129;//SPRITE_BASE+1;
+	// vic_setbank(bank);
+	init_play_screen();
+
+
+	SPRITE_IMAGES[0] = 75; //(SPRITE_BASE / 64);
+	SPRITE_IMAGES[1] = 76; //SPRITE_IMAGES[1]+1;
 	// SPRITE_IMAGES[2] = (byte)(SPRITE_BASE + 4);
 
 
-		// Install trampoline to keep system running with ROM paged out
-	mmap_trampoline();
+	// Install trampoline to keep system running with ROM paged out
+	// mmap_trampoline();
 
 	// Page in RAM
-	mmap_set(MMAP_RAM);
+	// mmap_set(MMAP_RAM);
 
 	// Expand hires and first color map
 	oscar_expand_lzo(Hires, PLAYFIELD_IMG);
-	oscar_expand_lzo(Screen, PLAYFIELD_SCR);
+	// oscar_expand_lzo(Screen, PLAYFIELD_SCR);
+
 
 	//oscar_expand_lzo(Sprites,SPRITE_BYTES);
+	
 	memcpy(Sprites,SPRITE_BYTES,SPRITE_BYTES_TO_COPY);
+	// for (int i=0;i<64;i++) {
+	// 	*((char*)(0x1d40+i))=SPRITE_BYTES[i];
+	// }
 	vic.color_border++;
 	
 	//Sprite attribs are just fine where they are; we'll use them later.
 	//oscar_expand_lzo(Sprite,SPRITE_BYTES,SPRITE_BYTES_TO_COPY);
 
 	// Turn IO space back on
-	mmap_set(MMAP_ROM);
+	// mmap_set(MMAP_ROM);
 
 	// Expand color attributes
 	// oscar_expand_lzo(Color, ImgColor);
 
 	// Set hires multicolor mode
-	//vic_setmode(VICM_HIRES, Screen, Hires);
+//	vic_setmode(VICM_HIRES, Screen, Hires);
+
 
 
 
 	//mmap_set(MMAP_ALL_ROM);
 
-	set_text_mode();
+	// set_text_mode();
 
 	//printf("Waiting forever now\n");
 	//while(1);
 
 	byte lastJoyY=255;
 
-	iocharmap(IOCHM_PETSCII_2);
+	// iocharmap(IOCHM_PETSCII_2);
 
-	init_play_screen();
+	// init_play_screen();
 
 	// kernal_clear_screen(VCOL_BLACK, VCOL_RED);
 
@@ -231,19 +294,21 @@ int main(void) {
 	// 	SPRITE_BYTES_TO_COPY[i]=0xff;
 	// }
 
+	spr_init(Text);
 
-	spr_init(SCREEN_ADDR);
-
-	for (int i=0;i<7;i++) {
-		byte spr0_color = SPRITE_BYTES[63+i] & 15; // byte 64 of sprite data set to sprite color by SpritePad
+	// for (int i=0;i<7;i++) {
+	// 	byte spr0_color = SPRITE_BYTES[63+i] & 15; // byte 64 of sprite data set to sprite color by SpritePad
 		
-	}
+	// }
 	byte spr0_color=SPRITE_BYTES[63] & 15;	//byte 64 of sprite data set to sprite color by SpritePad
 	vic.spr_mcolor0=15;
 	vic.spr_mcolor1=2;
 	vic.spr_priority=0xff;
 
-	spr_set(0, true, 0, 0, SPRITE_IMAGES[0], SPRITE_BYTES[63] & 15, true, false, false);
+#define SPRITE0_HANDLE (Sprites-(char *)(bank*8192))/64
+
+//	spr_set(0, true, 0, 0, SPRITE_IMAGES[0], SPRITE_BYTES[63] & 15, true, false, false);
+	spr_set(0, true, 100, 100, 0x75, spr0_color, true, false, false);
 
 	// spr_set(aliens[0].spr_num, true, aliens[0].x, spr_rowy[aliens[0].row], SPRITE_BASE+4, SPRITE_BYTES[64 * 4 + 63] & 15, true, false, false);
 
@@ -269,6 +334,19 @@ int main(void) {
 
 			// kernal_plot(0,0);
 			// out("line drawn at line %d        \n", scrn_row);
+		}
+		if (joyx[0]) {
+			int jx=joyx[0];
+			(*((char*)0x47f8))+=joyx[0];
+			//printf("%c%d\n",0x93,*((char*)0x07f8));
+
+			for (int n=0;n<400 && joyx[0]==jx;n++) {
+				vic.color_border=*((char*)0x47f8);
+				joy_poll(0);
+			}
+
+			//joy_poll(0);
+
 		}
 
 		move_aliens();
@@ -366,8 +444,15 @@ void out(const char *fmt, ...) {
 }
 
 void init_play_screen() {
+	for (int i=0;i<8192;i++){
+		Hires[i]=0;
+	}
+	for (int i=0;i<1000;i++) {
+		Text[i]=32;
+		ColorMem[i]=1;
+	}
 	//Set VIC to HIRES & set bank & addresses for HIRES & TEXT screens in the appropriate bank
-	vic_setmode(VICM_HIRES, Screen, Hires);
+	vic_setmode(VICM_HIRES, Text, Hires);
 
 	vic.color_border = VCOL_BLACK;
 	vic.color_back = VCOL_BLACK;
