@@ -15,7 +15,7 @@ CFLAGS=-g -O0 -n -vvv
 # 	$(CC) -c $(CPPFLAGS) -o=bin/$@.prg src/$<
 #	$(CC) $(CFLAGS) $<
 
-bin/%.prg: src/%.c src/includes/*.h assets/*.map assets/*.scr
+bin/%.prg: src/%.c src/includes/*.h assets/sprites/*
 	$(CC) $(CFLAGS) -o="$@" $<
 
 
