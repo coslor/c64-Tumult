@@ -162,7 +162,7 @@ Alien aliens[] = { {4,-50,0,2}};
 
 int main(void) {
 
-	vic_setbank(bank);
+	//vic_setbank(bank);
 	init_play_screen();
 
 	// Expand hires and first color map
@@ -225,10 +225,14 @@ void die()
  * 	joy_num			0 or 1 for joyports 1 and 2, or 2 for keyboard 
 
  */
-void move_ship(byte joy_num) {
-	if (joy_num == 2) { move_ship_keyboard(); }
-	else { move_ship_joystick(joy_num); }
-}
+ void move_ship(byte joy_num) {
+// 	if (joy_num == 2) {
+// 		move_ship_keyboard(); 
+// 	}
+// 	else { 
+		move_ship_joystick(joy_num); 
+// 	}
+ }
 
 void move_ship_keyboard() {
 	vic_setbank(0);
@@ -243,18 +247,17 @@ void move_ship_joystick(byte joy_num) {
 
 	static int poll_num=0;
 	static char last_joyx[2] = {0xff, 0xff}, last_joyy[2]={0xff,0xff};
-	//printf("last_joyx[0]==%d last_joyy[0]=%d\n",last_joyx[0],last_joyy[0]);
 
 	joy_poll(joy_num);
 
+	//only poll the joystick every ([50 or 60]/NUM_FRAMES_BETWEEN_MOVE_SHIP) seconds
 	if ((poll_num++ % NUM_FRAMES_BETWEEN_MOVE_SHIP) != 0) {
 		return;
 	}
 
 	joy_poll(joy_num);
-	//debounce the joystick y-axis
-	if (! ((joyx[joy_num] == last_joyx[joy_num]) && (joyy[joy_num] == last_joyy[joy_num])) ) {
-	//if (last_joyy[joy_num - 1]) {
+	//debounce the joystick y-axis NOTE: we don't seem to need this
+	//if ((joyx[joy_num] != last_joyx[joy_num]) || (joyy[joy_num] != last_joyy[joy_num]) ) {
 		ship_row += joyy[joy_num];
 		if (ship_row < 0)
 		{
@@ -273,11 +276,11 @@ void move_ship_joystick(byte joy_num) {
 		else if (joyx[joy_num - 1] > 0) {
 			ship_position = SHIP_RIGHT;
 		}
-			spr_image(0,ship_position);
+		spr_image(0,ship_position);
 
 		last_joyx[joy_num] = joyx[joy_num];
 		last_joyy[joy_num] = joyy[joy_num];
-	};
+	//};
 
 };
 

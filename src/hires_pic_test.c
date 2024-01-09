@@ -3,7 +3,7 @@
 #include <oscar.h>
 
 // Place bitmap memory underneath kernal ROM
-char *const Hires = (char *)0xe000;
+char *const HIRES = (char *)0xe000;
 
 // Place cell color map underneath IO
 char *const Screen = (char *)0xd000;
@@ -31,7 +31,7 @@ int main(void)
 	mmap_set(MMAP_RAM);
 
 	// Expand hires and first color map
-	oscar_expand_lzo(Hires, ImgHires);
+	oscar_expand_lzo(HIRES, ImgHires);
 	oscar_expand_lzo(Screen, ImgScreen);
 
 	// Turn IO space back on
@@ -41,7 +41,7 @@ int main(void)
 	// oscar_expand_lzo(Color, ImgColor);
 
 	// Set hires multicolor mode
-	vic_setmode(VICM_HIRES, Screen, Hires);
+	vic_setmode(VICM_HIRES, Screen, HIRES);
 	vic.color_border = VCOL_BLACK;
 	vic.color_back = VCOL_BLACK;
 
