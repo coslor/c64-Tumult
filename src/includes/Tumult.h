@@ -10,8 +10,8 @@
 
 #define KERNAL_CLRSCN 0xe544
 
-const char 			NUM_SPRITES = 11;
-const int 			SPRITE_BYTES_TO_COPY = NUM_SPRITES * 64;
+char 			NUM_SPRITES = 11;
+int 			SPRITE_BYTES_TO_COPY = NUM_SPRITES * 64;
 
 //#define	SpriteData	0x2000
 #define	SCREEN_ADDR	(char *)0x0400
@@ -42,6 +42,9 @@ void kernal_plot(char row, char col);
 //void draw_playfield();
 
 void move_aliens();
+void move_ship(byte joy_port);
+void move_ship_keyboard();
+void move_ship_joystick(byte joy_num);
 
 // struct SPDHeader5
 // {
@@ -91,6 +94,12 @@ void move_aliens();
 #define RIGHT_JUNCTION_CHAR		CHAR_INVERSE_SPACE
 #define JUNCTION_HORIZ_LINE_CHAR CHAR_INVERSE_SPACE
 
+#define NUM_FRAMES_BETWEEN_MOVE_SHIP 5
 
 void set_text_mode();
 void die();
+void main_loop();
+
+/* Valid banks are 0-3, addr must be >=0 and  <0x4000 */
+#define BANK_ADDR(bank,offset) (int)((long)(bank*0x4000)+offset)
+

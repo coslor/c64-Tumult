@@ -3,7 +3,7 @@
 
  CC			=c:/Users/chris/oscar64/bin/oscar64.exe
 
-CFLAGS=-g -O0 -n -v
+CFLAGS=-g -O0 -n -vvv
 
 # OBJDIR=bin
 # vpath %.c src
@@ -32,7 +32,7 @@ all: bin/Tumult.prg bin/staticsprite.prg bin/bitmapcolorimage.prg bin/staticspri
 # 	$(CC) $(CFLAGS) -O2 $<
 
 clean:
-	$(RM) bin/*.asm bin/*.int bin/*.lbl bin/*.map bin/*.prg bin/*.bcs 
+	$(RM) bin/*.asm bin/*.int bin/*.lbl bin/*.map bin/*.prg bin/*.bcs  bin/*.dbj 
 # CFLAGS		=-n
 # BIN			=bin
 # SRC			=src
