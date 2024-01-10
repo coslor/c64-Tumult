@@ -1,9 +1,11 @@
 # .SUFFIXES:
 # .SUFFIXES: .c .prg
+VPATH = src:src/includes
 
- CC			=c:/Users/chris/oscar64/bin/oscar64.exe
+CC			=c:/Users/chris/oscar64/bin/oscar64.exe
 
-CFLAGS=-g -O0 -n -vvv
+CFLAGS=-g -O0 -n -v
+
 
 # OBJDIR=bin
 # vpath %.c src
@@ -15,12 +17,20 @@ CFLAGS=-g -O0 -n -vvv
 # 	$(CC) -c $(CPPFLAGS) -o=bin/$@.prg src/$<
 #	$(CC) $(CFLAGS) $<
 
-bin/%.prg: src/%.c src/includes/*.h assets/sprites/*
-	$(CC) $(CFLAGS) -o="$@" $<
+#
+# Only compile Tumult.c, but have freshness dependencies on the other cc files, all .h files, all assets & sprites
+#
+DEPS=src/includes/*.h assets/* assets/sprites/*
 
+bin/Tumult.prg:src/Tumult.c $(DEPS)
+	echo $(INCLUDE);(date)>make-out.log ; $(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $< >>make-out.log
+
+bin/bitmapcolorimage.prg:src/bitmapcolorimage.c $(DEPS)
+	$(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $<
 
 #all: snake.prg lander.prg maze3d.prg missile.prg breakout.prg connectfour.prg hscrollshmup.prg
-all: bin/Tumult.prg bin/staticsprite.prg bin/bitmapcolorimage.prg bin/staticsprite.prg bin/hires_pic_test.prg
+#all: bin/Tumult.prg bin/staticsprite.prg bin/bitmapcolorimage.prg bin/staticsprite.prg bin/hires_pic_test.prg
+all: bin/Tumult.prg bin/bitmapcolorimage.prg
 
 # snake.prg: snake.c
 # 	$(CC) $<
