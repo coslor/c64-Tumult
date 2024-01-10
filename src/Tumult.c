@@ -28,17 +28,7 @@ TODO: implement pickups
 */
 //
 
-#define DEBUG
-
 #include "includes/Tumult.h"
-#include "includes/my_petscii.h"
-#include <stdbool.h>
-#include <c64/memmap.h>
-#include <gfx/bitmap.h>
-#include <oscar.h>
-#include <math.h>
-#include <c64/vic.h>
-#include <stdint.h>
 
 //#pragma region( lower, 0x0a00, 0x2000, , , {code, data} )
 
@@ -160,7 +150,44 @@ typedef struct Alien {
 #define NUM_ALIENS 1
 Alien aliens[] = { {4,-50,0,2}};
 
+bool keep_looping = true;
+
+char* final_message=NULL;
+
+/*
+*	Returns the key_entry (CIA keyboard row & col values) for the given key (ex: 's' for the S key).
+*/
+//key_entry *get_key_entry(char key);
+
+ 
 int main(void) {
+
+	iocharmap(IOCHM_PETSCII_2);	//put printf() in lowercase mode
+
+	printf(p"press WASD or SPACE\n");
+	while (true) {
+		if (check_for_key_char('w')) {
+			printf(p"UP\n");
+		}
+
+		if (check_for_key_char('a')) {
+			printf(p"LEFT\n");
+		}
+		if (check_for_key_char('d')) {
+			printf(p"RIGHT\n");
+		}
+		if (check_for_key_char('s')) {
+			printf(p"DOWN\n");
+		}
+		if (check_for_key_char(' ')) {
+			printf(p"FIRE\n");
+		}
+		if (check_for_key_char(3)) {
+			printf(p"BREAK!\n");
+			break;
+		}
+	}
+
 
 	//vic_setbank(bank);
 	init_play_screen();
@@ -183,32 +210,45 @@ int main(void) {
 	for (int i=0;i<7;i++) {
 		byte spr0_color = SPRITE_BYTES[63+i] & 15; // byte 64 of sprite data set to sprite color by SpritePad
 		
-	 }
+	}
 	byte spr0_color=SPRITES[63] & 15;	//byte 64 of sprite data set to sprite color by SpritePad
 
 	vic.spr_mcolor0=15;
 	vic.spr_mcolor1=2;
 	vic.spr_priority=0xff;
 
-	bool keep_looping = true;
 	
 	spr_set(0, true, 100, 100, 0x75, spr0_color, true, false, false);
 
 	ship_position = SHIP_LEFT;
 
-	while (keep_looping) {
-		main_loop();
-	};
+	do {
+		keep_looping = main_loop();
+	} while (keep_looping) ;
 
-	//vic.color_border++;
+	set_text_mode();
+	vic.spr_enable=0;	//turn all sprites off
+	vic.color_border=VCOL_BLUE;
+	kernal_clear_screen(VCOL_BLUE, VCOL_LT_BLUE);
+	iocharmap(IOCHM_PETSCII_2);	//put printf() in lowercase mode
+
+	if (final_message) {
+		printf(final_message);
+		return 1;
+	}
+	
 	return 0;
 }
 
-void main_loop() {
-		vic_waitFrame();
+/** Returns whether we should keep running the main loop */
+bool main_loop() {
+	vic_waitFrame();
 
-		move_ship(0);
-		move_aliens();
+	return (
+		move_ship(0) 	&& 
+		move_bullets() 	&& 
+		move_aliens() 
+	);
 }
 
 
@@ -221,29 +261,28 @@ void die()
 }
 
 /* Read the joystick and move the ship up or down 1 row. Updates ((50 or 60) / NUM_FRAMES_BETWEEN_MOVE_SHIP) times/second.
- *
- * 	joy_num			0 or 1 for joyports 1 and 2, or 2 for keyboard 
-
+ *	Params:
+ * 		joy_num			0 or 1 for joyports 1 and 2, or 2 for keyboard 
+ * 
+ *	@returns whether we should keep running the main loop
  */
- void move_ship(byte joy_num) {
-// 	if (joy_num == 2) {
-// 		move_ship_keyboard(); 
-// 	}
-// 	else { 
-		move_ship_joystick(joy_num); 
-// 	}
+bool move_ship(byte joy_num) {
+	if (joy_num == 2) {
+		return move_ship_keyboard(); 
+	}
+	else { 
+		return move_ship_joystick(joy_num); 
+	}
  }
 
-void move_ship_keyboard() {
+bool move_ship_keyboard() {
+
 	vic_setbank(0);
-	vic_setmode(VICM_TEXT, TEXT, HIRES);
-	kernal_clear_screen(VCOL_BLACK, VCOL_LT_BLUE);
-	kernal_plot(0,0);
-	printf("DOH! move_ship_keyboard() is not implemented!\n");
-	while(true);
+	final_message=(char*)"MOVE\xa4SHIP\xa4KEYBOARD() is not implemented!\ndying now...\n";
+	return false;
 }
 
-void move_ship_joystick(byte joy_num) {
+bool move_ship_joystick(byte joy_num) {
 
 	static int poll_num=0;
 	static char last_joyx[2] = {0xff, 0xff}, last_joyy[2]={0xff,0xff};
@@ -252,7 +291,7 @@ void move_ship_joystick(byte joy_num) {
 
 	//only poll the joystick every ([50 or 60]/NUM_FRAMES_BETWEEN_MOVE_SHIP) seconds
 	if ((poll_num++ % NUM_FRAMES_BETWEEN_MOVE_SHIP) != 0) {
-		return;
+		return true;
 	}
 
 	joy_poll(joy_num);
@@ -281,7 +320,7 @@ void move_ship_joystick(byte joy_num) {
 		last_joyx[joy_num] = joyx[joy_num];
 		last_joyy[joy_num] = joyy[joy_num];
 	//};
-
+	return true;
 };
 
 /* Send a debug message to the screen */
@@ -317,6 +356,7 @@ void init_play_screen() {
 void kernal_clear_screen(VICColors back_color, VICColors char_color) {
 	//vic.color_border=back_color;
 	vic.color_back=back_color;
+	vic.color_border=back_color;
 	*TEXT_COLOR=char_color;
 
 	__asm {
@@ -334,7 +374,7 @@ void kernal_plot(byte row, byte col) {
 }
 
 
-void move_aliens() {
+bool move_aliens() {
 	//vic.color_border++;
 
 	for (byte i=0;i<NUM_ALIENS;i++) {
@@ -343,6 +383,7 @@ void move_aliens() {
 	}
 
 	//vic.color_border--;
+	return true;
 }
 
 // void display_aliens() {
@@ -354,3 +395,8 @@ void move_aliens() {
 void set_text_mode() {
 	vic_setmode(VICM_TEXT, (char *)0x0400, (char *)0x1000);
 }
+
+bool move_bullets() {
+	return true;
+}
+

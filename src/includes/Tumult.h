@@ -7,6 +7,18 @@
 //#include <stdarg.h>
 #include <c64/joystick.h>
 
+#include <stdbool.h>
+#include <c64/memmap.h>
+#include <gfx/bitmap.h>
+#include <oscar.h>
+#include <math.h>
+#include <stdint.h>
+#include <stddef.h>
+
+#include "my_petscii.h"
+#include "keyboard.h"
+
+#define DEBUG
 
 #define KERNAL_CLRSCN 0xe544
 
@@ -41,10 +53,12 @@ void kernal_plot(char row, char col);
 
 //void draw_playfield();
 
-void move_aliens();
-void move_ship(byte joy_port);
-void move_ship_keyboard();
-void move_ship_joystick(byte joy_num);
+//These should return true unless we need to stop the game.
+bool move_aliens();
+bool move_ship(byte joy_port);
+bool move_ship_keyboard();
+bool move_ship_joystick(byte joy_num);
+bool move_bullets();
 
 // struct SPDHeader5
 // {
@@ -98,8 +112,9 @@ void move_ship_joystick(byte joy_num);
 
 void set_text_mode();
 void die();
-void main_loop();
+bool main_loop();
 
 /* Valid banks are 0-3, addr must be >=0 and  <0x4000 */
 #define BANK_ADDR(bank,offset) (int)((long)(bank*0x4000)+offset)
 
+//#pragma compile("/../Tumult.c")
