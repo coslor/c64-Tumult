@@ -29,7 +29,17 @@ TODO: implement pickups
 //
 
 #include "includes/Tumult.h"
+#include "includes/my_petscii.h"
+#include <c64/keyboard.h>
+#include <stdarg.h>
+#include "includes/prefs.h"
+#include "includes/file_io.h"
 
+/*
+ *	MEMORY REGIONS
+ *
+ * 	TODO: fix gaps in the memory map
+ */
 //#pragma region( lower, 0x0a00, 0x2000, , , {code, data} )
 
 //	We want our Hires screen to be at:
@@ -62,13 +72,11 @@ TODO: implement pickups
 #pragma section(sprites, 0)
 #pragma region(sprites, SPRITE_START, 0x6000, , , {sprites} )
 
-
 #pragma section( hires_sec, 0)
 #pragma region( hires_reg, 0x6000, 0x8000, , , {hires_sec} )
 
-#pragma region( main, 0x8000, 0xa000, , , {code, data, bss, heap, stack} );
+#pragma region( main, 0x8001, 0xa000, , , {code, data, bss, heap, stack} );
 #pragma data(data)
-
 
 // Color RAM
 static char *COLOR_MEM 			= (char *)0xd800;
@@ -87,7 +95,7 @@ const byte PLAYFIELD_IMG[] = {
 	#embed lzo "assets/tumult-back-010424.map"
 };
 
-__export static const byte PLAYFIELD_SCR[] = {
+static const byte PLAYFIELD_SCR[] = {
 	#embed lzo "assets/tumult-back-010424.scr"
 };
 
@@ -132,10 +140,10 @@ const byte SHIP_RIGHT_SPR_HDL	=SPRITE_BASE + 1;
 byte ship_x = 171;
 
 //The values for each enum are the corresponding sprite handles;
-enum SHIP_SPRITE_POS { 
+typedef enum SHIP_SPRITE_POS { 
 	SHIP_LEFT	= 0x76, 
 	SHIP_RIGHT	= 0x75 
-};
+} SHIP_SPRITE_POS;
 SHIP_SPRITE_POS ship_position = SHIP_LEFT;
 
 typedef struct Alien {
@@ -154,41 +162,71 @@ bool keep_looping = true;
 
 char* final_message=NULL;
 
-/*
-*	Returns the key_entry (CIA keyboard row & col values) for the given key (ex: 's' for the S key).
-*/
-//key_entry *get_key_entry(char key);
+Preferences prefs;
 
- 
+// void init_tumult_prefs() {
+
+	
+// }
+
+// Tumult_Prefs prefs = {
+// 	2,
+// 	99,
+// 	KSCAN_I,
+// 	KSCAN_J,KSCAN_L,
+// 	KSCAN_K,
+// 	KSCAN_SPACE,
+// 	KSCAN_STOP
+// 	};
+
+
 int main(void) {
 
 	iocharmap(IOCHM_PETSCII_2);	//put printf() in lowercase mode
 
-	printf(p"press WASD or SPACE\n");
-	while (true) {
-		if (check_for_key_char('w')) {
-			printf(p"UP\n");
-		}
+	printf("Initializing prefs...\n");
+	init_tumult_prefs();
+	//print_kernalio_message(8,1,"#1=%d #2=%f #3=%s",1,2.0,"hello");
 
-		if (check_for_key_char('a')) {
-			printf(p"LEFT\n");
-		}
-		if (check_for_key_char('d')) {
-			printf(p"RIGHT\n");
-		}
-		if (check_for_key_char('s')) {
-			printf(p"DOWN\n");
-		}
-		if (check_for_key_char(' ')) {
-			printf(p"FIRE\n");
-		}
-		if (check_for_key_char(3)) {
-			printf(p"BREAK!\n");
-			break;
-		}
-	}
+	// printf("Preferences=[ ");
+	// int i=0;
+	// do {
+	// 	int addr = ((int)(&prefs)+i);
+	// 	byte b=*((byte *)addr);
+	// 	printf("%d,",b);
+	// 	i++;
+	// } while (i<16);
+
+	// // for (int i=0;i<sizeof(Preferences);i++) {
+	// // 	printf("%d:%d,",i, (P));
+	// // }
+	// printf(" ]\n");
 
 
+	// if ( LAST_DEVICE_NUM >= 8 && LAST_DEVICE_NUM < 15 ){
+	// 	tumult_prefs.prefs_device=LAST_DEVICE_NUM;
+	// }
+
+	// // while (true) {
+	// // 	keyb_poll();
+	// // 	if (keyb_key) {
+	// // 		printf("key=%d\n", (keyb_key & 0b01111111));
+	// // 	}
+	// // }
+	printf("Printing prefs...\n");
+	print_prefs(&prefs);
+
+	return 0;
+
+	// printf("prefs:input_device=%d up_key=%d down_key=%d left_key=%d right_key=%d fire_key=%d break_key=%d\n",
+	// 	prefs.input_device,
+	// 	prefs.up_key,
+	// 	prefs.down_key,
+	// 	prefs.left_key,
+	// 	prefs.right_key,
+	// 	prefs.fire_key,
+	// 	prefs.break_key);
+	
 	//vic_setbank(bank);
 	init_play_screen();
 
@@ -196,9 +234,7 @@ int main(void) {
 	oscar_expand_lzo(HIRES, PLAYFIELD_IMG);
 	oscar_expand_lzo(HIRES_TEXT, PLAYFIELD_SCR);
 	oscar_expand_lzo(SPRITES,SPRITE_BYTES);
-	
-	//memcpy(Sprites,SPRITE_BYTES,SPRITE_BYTES_TO_COPY);
-	
+		
 	//Sprite attribs are just fine where they are; we'll use them later.
 	//oscar_expand_lzo(Sprite,SPRITE_BYTES,SPRITE_BYTES_TO_COPY);
 
@@ -245,7 +281,7 @@ bool main_loop() {
 	vic_waitFrame();
 
 	return (
-		move_ship(0) 	&& 
+		move_ship() 	&& 
 		move_bullets() 	&& 
 		move_aliens() 
 	);
@@ -266,38 +302,82 @@ void die()
  * 
  *	@returns whether we should keep running the main loop
  */
-bool move_ship(byte joy_num) {
-	if (joy_num == 2) {
+bool move_ship() {
+	if (prefs.input_device >1) {
 		return move_ship_keyboard(); 
 	}
-	else { 
-		return move_ship_joystick(joy_num); 
+	else {
+		return move_ship_joystick(); 
 	}
  }
 
 bool move_ship_keyboard() {
+	static bool last_up=false, last_left=false, last_right=false, last_down=false;
 
-	vic_setbank(0);
-	final_message=(char*)"MOVE\xa4SHIP\xa4KEYBOARD() is not implemented!\ndying now...\n";
-	return false;
-}
+	keyb_poll();
+	if (key_pressed(prefs.entries[PREFS_DOWN_KEY].value)) {
+		if (! last_down) {
+			ship_row++;
+			if (ship_row > MAX_SHIP_ROW ) {
+				ship_row = MAX_SHIP_ROW;
+			}
+		}
+		last_up=false;
+		last_down=true;
+	} else if (key_pressed(prefs.entries[PREFS_UP_KEY].value)){
+		if (! last_up) {
+			ship_row--;
+			if (ship_row<0) {
+				ship_row=0;
+			}
+		}
+	last_up=true;
+	last_down=false;
+	}
+	else {
+		last_up=false;
+		last_down=false;
+	}
 
-bool move_ship_joystick(byte joy_num) {
+	spr_move(0, ship_x, spr_rowy[ship_row]);
+
+	if (key_pressed(prefs.entries[PREFS_LEFT_KEY].value)) {
+		ship_position=SHIP_LEFT;
+		last_left=true;
+		last_right=false;
+	} else if (key_pressed(prefs.entries[PREFS_RIGHT_KEY].value)) {
+		ship_position=SHIP_RIGHT;
+		last_right=true;
+		last_left=false;
+	} else{
+		last_right=false;
+		last_left=false;;
+	}
+	spr_image(0,ship_position);
+
+	if (key_pressed(prefs.entries[PREFS_FIRE_KEY].value)) {
+		vic.spr_color[0]++;
+	}
+
+	return true;
+};
+
+bool move_ship_joystick() {
 
 	static int poll_num=0;
 	static char last_joyx[2] = {0xff, 0xff}, last_joyy[2]={0xff,0xff};
 
-	joy_poll(joy_num);
+	joy_poll(prefs.input_device);
 
 	//only poll the joystick every ([50 or 60]/NUM_FRAMES_BETWEEN_MOVE_SHIP) seconds
 	if ((poll_num++ % NUM_FRAMES_BETWEEN_MOVE_SHIP) != 0) {
 		return true;
 	}
 
-	joy_poll(joy_num);
+	joy_poll(prefs.input_device);
 	//debounce the joystick y-axis NOTE: we don't seem to need this
 	//if ((joyx[joy_num] != last_joyx[joy_num]) || (joyy[joy_num] != last_joyy[joy_num]) ) {
-		ship_row += joyy[joy_num];
+		ship_row += joyy[prefs.input_device];
 		if (ship_row < 0)
 		{
 			ship_row = 0;
@@ -309,16 +389,16 @@ bool move_ship_joystick(byte joy_num) {
 
 		spr_move(0, ship_x, spr_rowy[ship_row]);
 
-		if (joyx[joy_num - 1] <0 ) {
+		if (joyx[prefs.input_device - 1] <0 ) {
 			ship_position = SHIP_LEFT;
 		}
-		else if (joyx[joy_num - 1] > 0) {
+		else if (joyx[prefs.input_device - 1] > 0) {
 			ship_position = SHIP_RIGHT;
 		}
 		spr_image(0,ship_position);
 
-		last_joyx[joy_num] = joyx[joy_num];
-		last_joyy[joy_num] = joyy[joy_num];
+		last_joyx[prefs.input_device] = joyx[prefs.input_device];
+		last_joyy[prefs.input_device] = joyy[prefs.input_device];
 	//};
 	return true;
 };

@@ -4,8 +4,9 @@ VPATH = src:src/includes
 
 CC			=c:/Users/chris/oscar64/bin/oscar64.exe
 
-CFLAGS=-g -O0 -n -v
-
+CFLAGS=-g -O0 -n -pp 
+#-v2
+#-e
 
 # OBJDIR=bin
 # vpath %.c src
@@ -22,11 +23,10 @@ CFLAGS=-g -O0 -n -v
 #
 DEPS=src/includes/*.h assets/* assets/sprites/*
 
-bin/Tumult.prg:src/Tumult.c $(DEPS)
-	echo $(INCLUDE);(date)>make-out.log ; $(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $< >>make-out.log
+bin/Tumult.prg: Tumult.c prefs.c file_io.c prefs.c tumult_prefs.c 
+	echo prereqs are:$^;(date)>make-out.log ; $(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ 
+#>>make-out.log
 
-bin/bitmapcolorimage.prg:src/bitmapcolorimage.c $(DEPS)
-	$(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $<
 
 #all: snake.prg lander.prg maze3d.prg missile.prg breakout.prg connectfour.prg hscrollshmup.prg
 #all: bin/Tumult.prg bin/staticsprite.prg bin/bitmapcolorimage.prg bin/staticsprite.prg bin/hires_pic_test.prg

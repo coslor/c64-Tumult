@@ -9,7 +9,19 @@
 		"tumult.h": "c",
 		"vic.h": "c",
 		"types.h": "c",
-		"stdint.h": "c"
+		"stdint.h": "c",
+		"cia.h": "c",
+		"stdbool.h": "c",
+		"oscar.h": "c",
+		"keyboard.h": "c",
+		"stddef.h": "c",
+		"stdio.h": "c",
+		"joystick.h": "c",
+		"string.h": "c",
+		"prefs.h": "c",
+		"sidfx.h": "c",
+		"file_io.h": "c",
+		"stdarg.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "enabled"
 }

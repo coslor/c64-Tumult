@@ -1,3 +1,5 @@
+#pragma once
+
 #include <c64/vic.h>
 #include <c64/sprites.h>
 #include <string.h>
@@ -6,6 +8,7 @@
 #include <stdlib.h>
 //#include <stdarg.h>
 #include <c64/joystick.h>
+#include <c64/keyboard.h>
 
 #include <stdbool.h>
 #include <c64/memmap.h>
@@ -15,8 +18,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "my_petscii.h"
-#include "keyboard.h"
+#include "file_io.h"
+#include "tumult_prefs.h"
 
 #define DEBUG
 
@@ -55,10 +58,18 @@ void kernal_plot(char row, char col);
 
 //These should return true unless we need to stop the game.
 bool move_aliens();
-bool move_ship(byte joy_port);
+bool move_ship();
 bool move_ship_keyboard();
-bool move_ship_joystick(byte joy_num);
+bool move_ship_joystick();
 bool move_bullets();
+
+//stuff to process proprties files
+
+/* opens prefs file, reads the data in, sets preferences as necessary, and closes the file */
+void close_file(byte file_num);
+void print_kernalio_message(byte device_num, byte file_num, const char *fmt, ...);
+
+#define LAST_DEVICE_NUM *((byte *)0xba)
 
 // struct SPDHeader5
 // {
@@ -118,3 +129,4 @@ bool main_loop();
 #define BANK_ADDR(bank,offset) (int)((long)(bank*0x4000)+offset)
 
 //#pragma compile("/../Tumult.c")
+
