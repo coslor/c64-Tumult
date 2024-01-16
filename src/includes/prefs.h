@@ -8,7 +8,7 @@
 #define MAX_PREF_NAME_LEN		40
 #define MAX_PREFS_ENTRIES		16
 
-#define PREFS_PRINTF_COUNT_STR	"%d entries.\n"
+#define PREFS_PRINTF_COUNT_STR	"%d entries\n"
 #define PREFS_PRINTF_ENTRY_STR	"%d:%s=%d\n"
 
 typedef union Prefs_Value {
@@ -34,7 +34,7 @@ typedef union Prefs_Value {
  * 
  */
 typedef struct Preference {
-	char 					name[MAX_PREF_NAME_LEN];
+	char	 				name[MAX_PREF_NAME_LEN];
 	int						value;
 } Preference;
 
@@ -57,14 +57,16 @@ typedef struct Preference {
  
  **/
 typedef struct Preferences {
-	int 					input_device;
-	int 					prefs_device;
+	//int 					input_device;
+	//int 					prefs_device;
 	struct Preference		*entries;
 	int						entry_count;
 } Preferences;
 
-void set_pref_value(Preferences *prefs, int pref_num, char *pref_name, int pref_value);
-Preference find_preference_by_name(Preferences *prefs, char *pref_name);
-int find_pref_value_by_name(Preferences *prefs, char *pref_name);
+void set_pref_value(Preferences *prefs, int pref_num, const char *pref_name, int pref_value);
+Preference find_preference_by_name(Preferences *prefs, const char *pref_name);
+int find_pref_value_by_name(Preferences *prefs, const char *pref_name);
 void print_prefs(Preferences *prefs);
 bool read_prefs(Preferences *prefs, int enum_count);
+bool read_prefs_from_file(int file_num, const char *filename, Preferences *prefs);
+bool write_prefs_to_file(Preferences *prefs, int file_num, const char *filename) ;

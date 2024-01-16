@@ -37,7 +37,7 @@ char kernalio_buffer[MAX_KERNALIO_BUFFER_LEN];
 // }
 
 
-void print_kernalio_message(byte device_num, byte file_num, const char *fmt, ...) {
+void print_kernalio_message(byte device_num, const char *fmt, ...) {
 	sformat(kernalio_buffer, fmt, (int *)&fmt + 1, false);
 
 	printf("Error status %d on dev %d:%s\n", krnio_pstatus[device_num], device_num, kernalio_buffer);

@@ -21,7 +21,8 @@
 		"prefs.h": "c",
 		"sidfx.h": "c",
 		"file_io.h": "c",
-		"stdarg.h": "c"
+		"stdarg.h": "c",
+		"tumult_prefs.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "enabled"
 }

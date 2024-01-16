@@ -4,7 +4,7 @@ VPATH = src:src/includes
 
 CC			=c:/Users/chris/oscar64/bin/oscar64.exe
 
-CFLAGS=-g -O0 -n -pp 
+CFLAGS=-g -O0 -n -pp
 #-v2
 #-e
 
@@ -21,9 +21,12 @@ CFLAGS=-g -O0 -n -pp
 #
 # Only compile Tumult.c, but have freshness dependencies on the other cc files, all .h files, all assets & sprites
 #
-DEPS=src/includes/*.h assets/* assets/sprites/*
+DEPS=src/includes/*.h Tumult.c prefs.c file_io.c prefs.c tumult_prefs.c
+# assets/* assets/sprites/* 
 
-bin/Tumult.prg: Tumult.c prefs.c file_io.c prefs.c tumult_prefs.c 
+VICE=C:/Users/chris/WinVice/GTK3VICE-3.5-win64/bin/x64sc.exe
+
+bin/Tumult.prg: $(DEPS)
 	echo prereqs are:$^;(date)>make-out.log ; $(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ 
 #>>make-out.log
 
@@ -43,6 +46,9 @@ all: bin/Tumult.prg bin/bitmapcolorimage.prg
 
 clean:
 	$(RM) bin/*.asm bin/*.int bin/*.lbl bin/*.map bin/*.prg bin/*.bcs  bin/*.dbj 
+
+run: all
+	$(VICE) bin/Tumult.prg
 # CFLAGS		=-n
 # BIN			=bin
 # SRC			=src

@@ -1,5 +1,11 @@
 #include "includes/keyboard.h"
 
+#include <stdio.h>
+
+bool check_for_matrix(struct cia_matrix matrix){
+	return check_for_key(matrix.column, matrix.row);
+}
+
 bool check_for_key(byte column, byte row) {
 	__asm {sei};
 
@@ -28,7 +34,7 @@ static key_entry *get_key_entry(char key) {
 bool check_for_key_char(char key) {
 	key_entry *entry = get_key_entry(key);
 	if (entry != NULL) {
-		return check_for_key(entry->column, entry->row);
+		return check_for_key(entry->matrix.column, entry->matrix.row);
 	}
 	else {
 		printf("***CHECK-FOR-KEY-CHAR():KEY %c NOT FOUND\n",key);

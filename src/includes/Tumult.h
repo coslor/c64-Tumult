@@ -23,14 +23,14 @@
 
 #define DEBUG
 
-#define KERNAL_CLRSCN 0xe544
+#define KERNAL_CLRSCN 			0xe544
 
-char 			NUM_SPRITES = 11;
-int 			SPRITE_BYTES_TO_COPY = NUM_SPRITES * 64;
+#define NUM_SPRITES 			11
+#define SPRITE_BYTES_TO_COPY	NUM_SPRITES * 64
 
 //#define	SpriteData	0x2000
-#define	SCREEN_ADDR	(char *)0x0400
-#define	TEXT_COLOR	(char *)0x0286
+#define	SCREEN_ADDR				(char *)0x0400
+#define	TEXT_COLOR				(char *)0x0286
 
 /** Lives in stdio.c*/
 char *sformat(char *, const char *, int *, bool);

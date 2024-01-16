@@ -1,3 +1,5 @@
+#pragma once
+
 #include <c64/keyboard.h>
 #include "prefs.h"
 

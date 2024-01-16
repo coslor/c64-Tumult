@@ -180,42 +180,53 @@ Preferences prefs;
 // 	};
 
 
+void print_header_line(const char *message) {
+	static char space_buffer[80];
+
+	putch(18); //RVS ON
+	int msg_len=strlen(message);
+	int num_spaces=(40-msg_len)/2;
+	for (byte i=0;i<num_spaces;i++) {space_buffer[i]=' ';}
+	space_buffer[num_spaces]='\0';
+	printf("%s%s%s\n",&space_buffer[0], &message[0], &space_buffer[0]);
+	putch(146);	//RVS OFF
+}
+
 int main(void) {
 
 	iocharmap(IOCHM_PETSCII_2);	//put printf() in lowercase mode
 
-	printf("Initializing prefs...\n");
+
+	print_header_line("Initializing prefs");
 	init_tumult_prefs();
 	//print_kernalio_message(8,1,"#1=%d #2=%f #3=%s",1,2.0,"hello");
 
-	// printf("Preferences=[ ");
-	// int i=0;
-	// do {
-	// 	int addr = ((int)(&prefs)+i);
-	// 	byte b=*((byte *)addr);
-	// 	printf("%d,",b);
-	// 	i++;
-	// } while (i<16);
+	printf("last device=%d in prefs=%d\n", LAST_DEVICE_NUM, prefs.entries[PREFS_PREFS_DEVICE_NUM].value);
 
-	// // for (int i=0;i<sizeof(Preferences);i++) {
-	// // 	printf("%d:%d,",i, (P));
-	// // }
-	// printf(" ]\n");
-
-
-	// if ( LAST_DEVICE_NUM >= 8 && LAST_DEVICE_NUM < 15 ){
-	// 	tumult_prefs.prefs_device=LAST_DEVICE_NUM;
-	// }
-
-	// // while (true) {
-	// // 	keyb_poll();
-	// // 	if (keyb_key) {
-	// // 		printf("key=%d\n", (keyb_key & 0b01111111));
-	// // 	}
-	// // }
-	printf("Printing prefs...\n");
+	print_header_line("Prefs at startup");	//RVS ON, RVS OFF
 	print_prefs(&prefs);
+	putch(13); //newline
 
+	print_header_line("Saving prefs");
+	write_prefs_to_file(&prefs, 1, "@0:prefs2.txt");
+
+	set_pref_value(&prefs, PREFS_PREFS_DEVICE_NUM, (char *)"prefs_device", 0);
+	prefs.entry_count=0;
+
+	print_header_line("Showing empty prefs");
+	print_prefs(&prefs);
+	putch(13);	//newline
+
+	if (read_prefs_from_file(1,"prefs.txt", &prefs)) {
+		print_header_line("Showing prefs after read");
+		print_prefs(&prefs);
+		putch(13);
+	} else {
+		printf("Error reading prefs from file!");
+		return -1;
+	}
+
+	
 	return 0;
 
 	// printf("prefs:input_device=%d up_key=%d down_key=%d left_key=%d right_key=%d fire_key=%d break_key=%d\n",
@@ -303,7 +314,7 @@ void die()
  *	@returns whether we should keep running the main loop
  */
 bool move_ship() {
-	if (prefs.input_device >1) {
+	if (prefs.entries[PREFS_INPUT_DEVICE_NUM].value >1) {
 		return move_ship_keyboard(); 
 	}
 	else {
@@ -363,21 +374,22 @@ bool move_ship_keyboard() {
 };
 
 bool move_ship_joystick() {
+	int joy_num=prefs.entries[PREFS_INPUT_DEVICE_NUM].value;
 
 	static int poll_num=0;
 	static char last_joyx[2] = {0xff, 0xff}, last_joyy[2]={0xff,0xff};
 
-	joy_poll(prefs.input_device);
+	joy_poll(joy_num);
 
 	//only poll the joystick every ([50 or 60]/NUM_FRAMES_BETWEEN_MOVE_SHIP) seconds
 	if ((poll_num++ % NUM_FRAMES_BETWEEN_MOVE_SHIP) != 0) {
 		return true;
 	}
 
-	joy_poll(prefs.input_device);
+	joy_poll(prefs.entries[PREFS_INPUT_DEVICE_NUM].value - 1);
 	//debounce the joystick y-axis NOTE: we don't seem to need this
 	//if ((joyx[joy_num] != last_joyx[joy_num]) || (joyy[joy_num] != last_joyy[joy_num]) ) {
-		ship_row += joyy[prefs.input_device];
+		ship_row += joyy[joy_num];
 		if (ship_row < 0)
 		{
 			ship_row = 0;
@@ -389,16 +401,16 @@ bool move_ship_joystick() {
 
 		spr_move(0, ship_x, spr_rowy[ship_row]);
 
-		if (joyx[prefs.input_device - 1] <0 ) {
+		if (joyx[joy_num] <0 ) {
 			ship_position = SHIP_LEFT;
 		}
-		else if (joyx[prefs.input_device - 1] > 0) {
+		else if (joyx[joy_num] > 0) {
 			ship_position = SHIP_RIGHT;
 		}
 		spr_image(0,ship_position);
 
-		last_joyx[prefs.input_device] = joyx[prefs.input_device];
-		last_joyy[prefs.input_device] = joyy[prefs.input_device];
+		last_joyx[joy_num] = joyx[joy_num];
+		last_joyy[joy_num] = joyy[joy_num];
 	//};
 	return true;
 };
