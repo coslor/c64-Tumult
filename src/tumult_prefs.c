@@ -1,37 +1,65 @@
-#include "includes/tumult_prefs.h"
+#include "includes/new_prefs.h"
 #include "includes/Tumult.h"
 #include <stdbool.h>
-extern Preferences prefs;
+//extern Preferences prefs;
+extern struct New_Prefs	prefs;
 
 
 // void close_prefs_file(byte file_num) ;
 
 void init_tumult_prefs() {
-	prefs.entry_count = 8;
-	prefs.entries = new Preference[prefs.entry_count];
 
-	printf("Setting entries\n");
-	prefs.entries[PREFS_INPUT_DEVICE_NUM] 	= (Preference){.name="input_device", 	.value=2};
-	int dev_num=LAST_DEVICE_NUM;
-	//prefs.entries[PREFS_PREFS_DEVICE_NUM] 	= (Preference){.name="prefs_device", 	.value=(const byte)*((byte *)0xba)};
-	set_pref_value(&prefs,PREFS_PREFS_DEVICE_NUM, 	"prefs_device", (int)LAST_DEVICE_NUM);
-	//prefs.entries[PREFS_UP_KEY] 			= (Preference){.name="up_key",	 		.value=KSCAN_I};
-	set_pref_value(&prefs,PREFS_UP_KEY, 			"up_key", 		KSCAN_I);
-	//prefs.entries[PREFS_DOWN_KEY]			= (Preference){.name="down_key", 		.value=KSCAN_K};
-	set_pref_value(&prefs,PREFS_DOWN_KEY, 			"down_key", 	KSCAN_K);
-	//prefs.entries[PREFS_LEFT_KEY]			= (Preference){.name="left_key", 		.value=KSCAN_J};
-	set_pref_value(&prefs,PREFS_LEFT_KEY, 			"left_key", 	KSCAN_J);
-	//prefs.entries[PREFS_RIGHT_KEY]			= (Preference){.name="down_key", 		.value=KSCAN_L};
-	set_pref_value(&prefs,PREFS_RIGHT_KEY, 			"right_key", 	KSCAN_L);
-	//prefs.entries[PREFS_FIRE_KEY]			= (Preference){.name="fire_key", 		.value=KSCAN_SPACE};
-	set_pref_value(&prefs,PREFS_FIRE_KEY, 			"fire_key", 	KSCAN_SPACE);
-	//prefs.entries[PREFS_STOP_KEY]			= (Preference){.name="stop_key", 		.value=KSCAN_STOP};
-	set_pref_value(&prefs,PREFS_STOP_KEY, 			"stop_key", 	KSCAN_STOP);
+	// int a[5] = {[4]=1,[3]=2,[2]=3,[1]=4,[0]=5};
+
+	// typedef struct Test { 
+	// 	int a; 
+	// 	int b; 
+	// } Test;
+
+	// Test test1 = {1,2};
+
+	New_Prefs empty_prefs = (New_Prefs){ 
+		//2,LAST_DEVICE_NUM,KSCAN_I,KSCAN_J,KSCAN_K,KSCAN_L,KSCAN_SPACE, KSCAN_STOP};
+		.input_device=2,
+		// .prefs_device = (const byte)(LAST_DEVICE_NUM),
+		.up_key = KSCAN_I, 
+		.left_key = KSCAN_J, 
+		.right_key = KSCAN_L,
+		.down_key = KSCAN_K,
+		.fire_key = KSCAN_SPACE, 
+		.menu_key = KSCAN_STOP 
+		 };
+	empty_prefs.prefs_device = LAST_DEVICE_NUM;
+
+	init_prefs(&prefs, empty_prefs);
+
+	// prefs.prefs_device 	= LAST_DEVICE_NUM;
+	// prefs.input_device	= 2;
+	// prefs.up_key		= KSCAN_I;
+	// prefs.left_key		= KSCAN_J;
+	// prefs.
+	// printf("Setting entries\n");
+	// prefs.entries[PREFS_INPUT_DEVICE_NUM] 	= (Preference){.name="input_device", 	.value=2};
+	// int dev_num=LAST_DEVICE_NUM;
+	// //prefs.entries[PREFS_PREFS_DEVICE_NUM] 	= (Preference){.name="prefs_device", 	.value=(const byte)*((byte *)0xba)};
+	// set_pref_value(&prefs,PREFS_PREFS_DEVICE_NUM, 	"prefs_device", (int)LAST_DEVICE_NUM);
+	// //prefs.entries[PREFS_UP_KEY] 			= (Preference){.name="up_key",	 		.value=KSCAN_I};
+	// set_pref_value(&prefs,PREFS_UP_KEY, 			"up_key", 		KSCAN_I);
+	// //prefs.entries[PREFS_DOWN_KEY]			= (Preference){.name="down_key", 		.value=KSCAN_K};
+	// set_pref_value(&prefs,PREFS_DOWN_KEY, 			"down_key", 	KSCAN_K);
+	// //prefs.entries[PREFS_LEFT_KEY]			= (Preference){.name="left_key", 		.value=KSCAN_J};
+	// set_pref_value(&prefs,PREFS_LEFT_KEY, 			"left_key", 	KSCAN_J);
+	// //prefs.entries[PREFS_RIGHT_KEY]			= (Preference){.name="down_key", 		.value=KSCAN_L};
+	// set_pref_value(&prefs,PREFS_RIGHT_KEY, 			"right_key", 	KSCAN_L);
+	// //prefs.entries[PREFS_FIRE_KEY]			= (Preference){.name="fire_key", 		.value=KSCAN_SPACE};
+	// set_pref_value(&prefs,PREFS_FIRE_KEY, 			"fire_key", 	KSCAN_SPACE);
+	// //prefs.entries[PREFS_STOP_KEY]			= (Preference){.name="stop_key", 		.value=KSCAN_STOP};
+	// set_pref_value(&prefs,PREFS_STOP_KEY, 			"stop_key", 	KSCAN_STOP);
 
 	//We have just as many Prefs_Entries as we have enums
 	//prefs.entry_count = sizeof(Tumult_Pref_Name);
 
-	set_pref_value(&prefs,PREFS_PREFS_DEVICE_NUM, "prefs_device", (int)LAST_DEVICE_NUM);
+	//set_pref_value(&prefs,PREFS_PREFS_DEVICE_NUM, "prefs_device", (int)LAST_DEVICE_NUM);
 }
 
 // /**********************prefs*********************************************************************/

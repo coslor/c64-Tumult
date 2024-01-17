@@ -21,7 +21,7 @@ CFLAGS=-g -O0 -n -pp
 #
 # Only compile Tumult.c, but have freshness dependencies on the other cc files, all .h files, all assets & sprites
 #
-DEPS=src/includes/*.h Tumult.c prefs.c file_io.c prefs.c tumult_prefs.c
+DEPS=src/includes/*.h Tumult.c prefs.c file_io.c prefs.c tumult_prefs.c new_prefs.c
 # assets/* assets/sprites/* 
 
 VICE=C:/Users/chris/WinVice/GTK3VICE-3.5-win64/bin/x64sc.exe
@@ -33,7 +33,11 @@ bin/Tumult.prg: $(DEPS)
 
 #all: snake.prg lander.prg maze3d.prg missile.prg breakout.prg connectfour.prg hscrollshmup.prg
 #all: bin/Tumult.prg bin/staticsprite.prg bin/bitmapcolorimage.prg bin/staticsprite.prg bin/hires_pic_test.prg
-all: bin/Tumult.prg bin/bitmapcolorimage.prg
+all: bin/Tumult.prg bin/struct_test.prg
+
+bin/struct_test.prg: struct_test.c
+	$(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ 
+
 
 # snake.prg: snake.c
 # 	$(CC) $<

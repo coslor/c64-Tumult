@@ -34,6 +34,7 @@ TODO: implement pickups
 #include <stdarg.h>
 #include "includes/prefs.h"
 #include "includes/file_io.h"
+#include "includes/new_prefs.h"
 
 /*
  *	MEMORY REGIONS
@@ -162,7 +163,8 @@ bool keep_looping = true;
 
 char* final_message=NULL;
 
-Preferences prefs;
+//Preferences prefs;
+New_Prefs prefs;
 
 // void init_tumult_prefs() {
 
@@ -201,28 +203,56 @@ int main(void) {
 	init_tumult_prefs();
 	//print_kernalio_message(8,1,"#1=%d #2=%f #3=%s",1,2.0,"hello");
 
-	printf("last device=%d in prefs=%d\n", LAST_DEVICE_NUM, prefs.entries[PREFS_PREFS_DEVICE_NUM].value);
+	//printf("last device=%d in prefs=%d\n", LAST_DEVICE_NUM, prefs.entries[PREFS_PREFS_DEVICE_NUM].value);
+	printf("last prefs device=%d\n", prefs.prefs_device);
+
 
 	print_header_line("Prefs at startup");	//RVS ON, RVS OFF
 	print_prefs(&prefs);
 	putch(13); //newline
 
-	print_header_line("Saving prefs");
-	write_prefs_to_file(&prefs, 1, "@0:prefs2.txt");
+	printf("type x to exit, or any other key to continue\n");
+	char c=0;
+	do {
+		c = getch();
+	} while (c==0);
 
-	set_pref_value(&prefs, PREFS_PREFS_DEVICE_NUM, (char *)"prefs_device", 0);
-	prefs.entry_count=0;
+	if (c=='x') {
+		printf("Exiting...\n");
+		return -1;
+	}
+	
+	putchar(147); //CLR
+
+	print_header_line("Saving prefs\n");
+	if (!save_prefs(&prefs, 1, prefs.prefs_device, (char *)"@0:prefs2.bin")) {
+		print_kernalio_message(1,"Error saving preferences!");
+		return -1;
+	}
+
+	// New_Prefs empty_prefs = (New_Prefs){
+	// 	.input_device=0,.prefs_device=0,
+	// 	.up_key=0, .left_key=0, .right_key=0, .down_key=0,
+	// 	.fire_key=0, .menu_key=0};
+	// copy_prefs(&prefs, empty_prefs);
+	// init_prefs( &prefs, 0,0,0,0,0,0,0,0);
+	clear_prefs(&prefs);
+
+	// set_pref_value(&prefs, PREFS_PREFS_DEVICE_NUM, (char *)"prefs_device", 0);
+	// prefs.entry_count=0;
 
 	print_header_line("Showing empty prefs");
 	print_prefs(&prefs);
 	putch(13);	//newline
 
-	if (read_prefs_from_file(1,"prefs.txt", &prefs)) {
-		print_header_line("Showing prefs after read");
+	prefs.prefs_device = LAST_DEVICE_NUM;
+
+	print_header_line("Showing prefs after read");
+	if (load_prefs(&prefs, 1,prefs.prefs_device,(char *)"PREFS2.BIN")) {
 		print_prefs(&prefs);
 		putch(13);
 	} else {
-		printf("Error reading prefs from file!");
+		print_kernalio_message(1,"Error reading prefs from \"%s\"", "prefs2.bin");
 		return -1;
 	}
 
@@ -314,7 +344,8 @@ void die()
  *	@returns whether we should keep running the main loop
  */
 bool move_ship() {
-	if (prefs.entries[PREFS_INPUT_DEVICE_NUM].value >1) {
+	//if (prefs.entries[PREFS_INPUT_DEVICE_NUM].value >1) {
+	if (prefs.input_device > 1 ) {
 		return move_ship_keyboard(); 
 	}
 	else {
@@ -326,7 +357,7 @@ bool move_ship_keyboard() {
 	static bool last_up=false, last_left=false, last_right=false, last_down=false;
 
 	keyb_poll();
-	if (key_pressed(prefs.entries[PREFS_DOWN_KEY].value)) {
+	if (key_pressed(prefs.input_device)) {
 		if (! last_down) {
 			ship_row++;
 			if (ship_row > MAX_SHIP_ROW ) {
@@ -335,7 +366,7 @@ bool move_ship_keyboard() {
 		}
 		last_up=false;
 		last_down=true;
-	} else if (key_pressed(prefs.entries[PREFS_UP_KEY].value)){
+	} else if (key_pressed(prefs.input_device)){
 		if (! last_up) {
 			ship_row--;
 			if (ship_row<0) {
@@ -352,11 +383,11 @@ bool move_ship_keyboard() {
 
 	spr_move(0, ship_x, spr_rowy[ship_row]);
 
-	if (key_pressed(prefs.entries[PREFS_LEFT_KEY].value)) {
+	if (key_pressed(prefs.input_device)) {
 		ship_position=SHIP_LEFT;
 		last_left=true;
 		last_right=false;
-	} else if (key_pressed(prefs.entries[PREFS_RIGHT_KEY].value)) {
+	} else if (key_pressed(prefs.input_device)) {
 		ship_position=SHIP_RIGHT;
 		last_right=true;
 		last_left=false;
@@ -366,7 +397,7 @@ bool move_ship_keyboard() {
 	}
 	spr_image(0,ship_position);
 
-	if (key_pressed(prefs.entries[PREFS_FIRE_KEY].value)) {
+	if (key_pressed(prefs.input_device)) {
 		vic.spr_color[0]++;
 	}
 
@@ -374,7 +405,8 @@ bool move_ship_keyboard() {
 };
 
 bool move_ship_joystick() {
-	int joy_num=prefs.entries[PREFS_INPUT_DEVICE_NUM].value;
+	//int joy_num=prefs.entries[PREFS_INPUT_DEVICE_NUM].value;
+	int joy_num=prefs.input_device;
 
 	static int poll_num=0;
 	static char last_joyx[2] = {0xff, 0xff}, last_joyy[2]={0xff,0xff};
@@ -386,7 +418,7 @@ bool move_ship_joystick() {
 		return true;
 	}
 
-	joy_poll(prefs.entries[PREFS_INPUT_DEVICE_NUM].value - 1);
+	joy_poll(prefs.input_device - 1);
 	//debounce the joystick y-axis NOTE: we don't seem to need this
 	//if ((joyx[joy_num] != last_joyx[joy_num]) || (joyy[joy_num] != last_joyy[joy_num]) ) {
 		ship_row += joyy[joy_num];
@@ -491,4 +523,5 @@ void set_text_mode() {
 bool move_bullets() {
 	return true;
 }
+
 
