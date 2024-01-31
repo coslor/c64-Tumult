@@ -1,25 +1,29 @@
 #pragma once
 
-#include <c64/vic.h>
-#include <c64/sprites.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+
 #include <string.h>
 #include <conio.h>
 #include <stdio.h>
-#include <stdlib.h>
-//#include <stdarg.h>
-#include <c64/joystick.h>
-#include <c64/keyboard.h>
-
-#include <stdbool.h>
-#include <c64/memmap.h>
-#include <gfx/bitmap.h>
+#include <math.h>
 #include <oscar.h>
 #include <math.h>
-#include <stdint.h>
-#include <stddef.h>
+
+#include <c64/joystick.h>
+#include <c64/keyboard.h>
+#include <c64/vic.h>
+#include <c64/sprites.h>
+#include <c64/memmap.h>
+
+#include <gfx/bitmap.h>
 
 #include "file_io.h"
 #include "tumult_prefs.h"
+#include "logger.h"
+
 
 #define DEBUG
 
@@ -33,7 +37,7 @@
 #define	TEXT_COLOR				(char *)0x0286
 
 /** Lives in stdio.c*/
-char *sformat(char *, const char *, int *, bool);
+//char *sformat(char *, const char *, int *, bool);
 
 /** If DEBUG is defined, than send output to the text screen. Otherwise, swallow the output.*/
 void out(const char *, ...);
@@ -68,6 +72,9 @@ bool move_bullets();
 /* opens prefs file, reads the data in, sets preferences as necessary, and closes the file */
 void close_file(byte file_num);
 void print_kernalio_message(byte device_num, byte file_num, const char *fmt, ...);
+
+//extern char * sformat(char * buff, const char * fmt, int * fps, bool print);
+
 
 #define LAST_DEVICE_NUM *((byte *)0xba)
 
@@ -125,7 +132,10 @@ void set_text_mode();
 void die();
 bool main_loop();
 
-/* Valid banks are 0-3, addr must be >=0 and  <0x4000 */
+bool print_continue_message();
+
+ 
+/* Valid banks are 0-3, addr must be >=0 and <0x4000 */
 #define BANK_ADDR(bank,offset) (int)((long)(bank*0x4000)+offset)
 
 //#pragma compile("/../Tumult.c")

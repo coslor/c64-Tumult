@@ -1,10 +1,10 @@
 # .SUFFIXES:
 # .SUFFIXES: .c .prg
-VPATH = src:src/includes
+VPATH = src:src/includes;src/tests/includes
 
 CC			=c:/Users/chris/oscar64/bin/oscar64.exe
 
-CFLAGS=-g -O0 -n -pp
+CFLAGS=-g -O0 -n -pp -v2
 #-v2
 #-e
 
@@ -21,7 +21,7 @@ CFLAGS=-g -O0 -n -pp
 #
 # Only compile Tumult.c, but have freshness dependencies on the other cc files, all .h files, all assets & sprites
 #
-DEPS=src/includes/*.h Tumult.c prefs.c file_io.c prefs.c tumult_prefs.c new_prefs.c
+DEPS=Tumult.c logger.c prefs.c file_io.c tumult_prefs.c new_prefs.c 
 # assets/* assets/sprites/* 
 
 VICE=C:/Users/chris/WinVice/GTK3VICE-3.5-win64/bin/x64sc.exe
@@ -33,12 +33,16 @@ bin/Tumult.prg: $(DEPS)
 
 #all: snake.prg lander.prg maze3d.prg missile.prg breakout.prg connectfour.prg hscrollshmup.prg
 #all: bin/Tumult.prg bin/staticsprite.prg bin/bitmapcolorimage.prg bin/staticsprite.prg bin/hires_pic_test.prg
-all: bin/Tumult.prg bin/struct_test.prg
+all: bin/Tumult.prg 
 
-bin/struct_test.prg: struct_test.c
-	$(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ 
+# bin/tests/struct_test.prg: struct_test.c
+# 	$(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ 
 
+# bin/tests/test_test.prg: tests/test_test.c tests/test_runner.c
+# 	$(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ 
 
+# run_tests:bin/tests/test_test.prg
+# 	$(VICE) bin/tests/test_test.prg
 # snake.prg: snake.c
 # 	$(CC) $<
 
@@ -49,7 +53,7 @@ bin/struct_test.prg: struct_test.c
 # 	$(CC) $(CFLAGS) -O2 $<
 
 clean:
-	$(RM) bin/*.asm bin/*.int bin/*.lbl bin/*.map bin/*.prg bin/*.bcs  bin/*.dbj 
+	$(RM) bin/*.asm bin/*.int bin/*.lbl bin/*.map bin/*.prg bin/*.bcs  bin/*.dbj bin/tests/*
 
 run: all
 	$(VICE) bin/Tumult.prg

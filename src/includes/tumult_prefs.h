@@ -1,8 +1,5 @@
 #pragma once
 
-#include <c64/keyboard.h>
-#include "prefs.h"
-
 typedef enum Tumult_Pref_Name {
 	PREFS_INPUT_DEVICE_NUM,
 	PREFS_PREFS_DEVICE_NUM,

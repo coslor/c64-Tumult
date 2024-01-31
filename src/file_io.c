@@ -1,10 +1,9 @@
 #pragma once
 
 #include <c64/types.h>
-#include "includes/file_io.h"
 #include <c64/kernalio.h>
-#include <stdbool.h>
 
+#include "includes/file_io.h"
 
 #define MAX_KERNALIO_BUFFER_LEN 88
 char kernalio_buffer[MAX_KERNALIO_BUFFER_LEN];
@@ -39,8 +38,9 @@ char kernalio_buffer[MAX_KERNALIO_BUFFER_LEN];
 
 void print_kernalio_message(byte device_num, const char *fmt, ...) {
 	sformat(kernalio_buffer, fmt, (int *)&fmt + 1, false);
+	int d = krnio_status();
 
-	printf("Error status %d on dev %d\n%s\n", krnio_pstatus[device_num], device_num, kernalio_buffer);
+	printf("Error:\"%s\"\nError status %d on dev %d\n", kernalio_buffer, d, device_num);
 	// printf("Error status from dev %d:%d\n", device_num, krnio_pstatus[device_num]);
 	printf("Press return to continue\n");
 	getchar();

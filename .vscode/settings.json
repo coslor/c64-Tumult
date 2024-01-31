@@ -23,7 +23,11 @@
 		"file_io.h": "c",
 		"stdarg.h": "c",
 		"tumult_prefs.h": "c",
-		"new_prefs.h": "c"
+		"new_prefs.h": "c",
+		"conio.h": "c",
+		"kernalio.h": "c",
+		"tests.h": "c",
+		"logger.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "enabled"
 }

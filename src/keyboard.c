@@ -1,3 +1,10 @@
+#include <stddef.h>
+#include <c64/cia.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+#include <c64/types.h>
+
 #include "includes/keyboard.h"
 
 #include <stdio.h>

@@ -28,13 +28,44 @@ TODO: implement pickups
 */
 //
 
+#include <string.h>
+#include <conio.h>
+#include <math.h>
+#include <oscar.h>
+#include <math.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+
+#include <gfx/bitmap.h>
+
+#include <c64/keyboard.h>
+#include <c64/vic.h>
+#include <c64/sprites.h>
+#include <c64/memmap.h>
+#include <c64/joystick.h>
+#include <c64/keyboard.h>
+#include <c64/kernalio.h>
+
+#include "includes/file_io.h"
+#include "includes/tumult_prefs.h"
+#include "includes/logger.h"
 #include "includes/Tumult.h"
 #include "includes/my_petscii.h"
-#include <c64/keyboard.h>
-#include <stdarg.h>
 #include "includes/prefs.h"
 #include "includes/file_io.h"
 #include "includes/new_prefs.h"
+
+
+//#define LOG_LEVEL INFO_LEVEL
+
+
+//extern void print_kernalio_message(byte device_num, const char *fmt, ...);
 
 /*
  *	MEMORY REGIONS
@@ -166,20 +197,11 @@ char* final_message=NULL;
 //Preferences prefs;
 New_Prefs prefs;
 
-// void init_tumult_prefs() {
 
-	
-// }
+byte misc_buffer[80];
 
-// Tumult_Prefs prefs = {
-// 	2,
-// 	99,
-// 	KSCAN_I,
-// 	KSCAN_J,KSCAN_L,
-// 	KSCAN_K,
-// 	KSCAN_SPACE,
-// 	KSCAN_STOP
-// 	};
+const byte *PREFS_FILENAME=p"prefs2";
+
 
 
 void print_header_line(const char *message) {
@@ -194,10 +216,201 @@ void print_header_line(const char *message) {
 	putch(146);	//RVS OFF
 }
 
+inline void press_return() {
+	char empty[1];
+
+	printf("press return to continue\n");
+	gets(empty);
+}
+
+
+void display_chars(char *str) {
+	printf("String '%s'\n\t",str);
+	int n=0;
+	char c;
+
+	do {
+		c=str[n++];
+		printf("%d,",c);
+		//if ((n++ % 8)==0) {
+		//	printf("\n\t");
+		//}
+	} while ((c != '\0') && (n < 80));
+	printf("\n");
+}
+
+void  validate_filenames(char filenames[][], byte num_names, int error_file_num) {
+	const int MAX_BUF_LEN=80;
+	static char buffer[MAX_BUF_LEN];
+	byte full_filename[40];
+
+
+	printf("**validating filenames***\n");
+
+	//bool success = true;
+	char char_read;
+	int st=-1;
+
+	for (int i=0;i<num_names;i++) {
+		// sprintf(full_filename, "%s,s,r", filenames[i]);
+		// krnio_setnam(full_filename);
+		printf("validating file #%d:\"%s\"\n", i, filenames[i]);
+		krnio_setnam(filenames[i]);
+
+		if (krnio_open(1,8,0)) {
+			if (check_for_drive_error(error_file_num,buffer,MAX_BUF_LEN) == 0) {
+				char c=0;
+				if ((c=krnio_getch(1)) == 'x') {
+					//printf("File opened OK: \"%s\"\n", filenames[i]);
+					//success = true;
+				} else {
+					printf("Error reading from file %s : st=%d c='%c'\n", filenames[i], st,c);
+					//success=false;
+				}//if c=kenio_getch)
+			} else {
+				printf("drive error:%s", buffer);
+				//success = false;
+			}//if check_for_drive_error
+
+			krnio_close(1);
+		} else { 
+			printf("Unable to open file %s : st=%d", filenames[i]);
+			//success = false;
+		} //if krnio_open
+	}
+}
+
+
+
+void create_filenames(char filenames[][], byte num_names, int error_file_num) {
+	//bool success;
+	int st=-1;
+	const int MAX_BUF_LEN=80;
+	static char buffer[MAX_BUF_LEN];
+	int err_num;
+
+	//byte full_filename[40];
+
+	printf("***creating filenames***\n");
+
+	for (int i=0;i<num_names;i++) {
+		printf("creating #%d:\"%s\"\n", i,filenames[i]);
+
+		krnio_setnam(filenames[i]);
+
+		if (krnio_open((i+1),8,1)) {	//1=success
+			if (err_num = check_for_drive_error(error_file_num,buffer,MAX_BUF_LEN) != 0) {
+			// if (err_num = check_for_drive_error(error_file_num,buffer,MAX_BUF_LEN) != 0) {
+				printf("drive error: %s \n", buffer);
+				//press_return();
+				break;
+			} else {
+				byte chars_written = krnio_putch(1,'x');
+				st=krnio_status();
+				if ((chars_written != 0) || st) {
+						printf("error writing to file \"%s\" : st=%d cr=%d\n",filenames[i],st, chars_written);
+						press_return();
+				} else {
+					printf("file was created OK: \"%s\"\n", filenames[i]);
+				}//if chars_written
+			} //check_for_drive_error				
+		} else { 	
+			printf("error opening file %s : st=%d\n", filenames[i], krnio_status());
+			press_return();
+		}//if krnio_open
+
+		krnio_close(i+1);
+	}//for
+}
+
+
+
+// #if LOG_LEVEL >= DEBUG_LEVEL
+// 	#define LOG_DEBUG(format,args...)		PRINTFUNCTION(format,args)
+// #else
+// 	#define LOG_DEBUG(format,args)
+// #endif
+
+// #define ll(LEVEL, args) \
+// 	#if LEVEL >= LOG_LEVEL \
+// 		printf("hello"); \
+// 	#endif
+// //(## args)
+
+
 int main(void) {
 
 	iocharmap(IOCHM_PETSCII_2);	//put printf() in lowercase mode
 
+	printf("LOG_LEVEL=%d\n", LOG_LEVEL);
+	//#pragma optimize(0)
+	log_debug(p"This is a DEBUG,%s,%d,%c\n","Chris",1,'2');
+	log_info(p"This is an INFO,%s,%d,%d\n", "Chris",3,4);
+	log_warn(p"This is a WARN,%s,%d\n","Chris",5);
+	log_error(p"This is an ERROR,%d %d %d\n",6,7,8);
+
+	return 0;
+	// char before[80],beforeP[80],after[80],afterP[80];
+
+	// strcpy(before,	"PreferencesB");
+	// display_chars(before);
+	// strcpy(beforeP, p"PreferencesBP");
+	// display_chars(beforeP);
+
+
+	// printf("***after***\n");
+
+	// strcpy(after,	"PreferencesA");
+	// display_chars(after);
+	// strcpy(afterP, 	p"PreferencesAP");
+	// display_chars(afterP);
+
+	char filenames[][]= {
+		"My_File1",
+		p"My_File1",
+		"MY_FILE1",
+		p"MY_FILE1"
+	};
+
+	if (! open_error_channel(15,8)) {
+		printf("Unable to open channel to drive %d\n", 8);
+		return -1;
+	}
+
+	//if (create_filenames(filenames,4,15)) {
+	create_filenames(filenames,4,15);
+	print_dir(8);
+	press_return();
+
+	validate_filenames(filenames,4, 15);
+	printf("all files checked out");
+	print_dir(8);
+	press_return();
+	iocharmap(IOCHM_PETSCII_2);	//put printf() in lowercase mode
+
+	char bad_filenames[][] = { "gibberish"};
+	printf("This should fail!\n");
+	validate_filenames(bad_filenames, 1, 15);
+	// } else {
+	// 	printf("filename validation failed!\n");
+	// 	return -1;
+	// }
+
+	// } else {
+	// 	printf("unable to create filenames. exiting\n");
+	// 	return -1;
+	// }
+
+	return 0;
+
+
+	// int code,track,sector;
+	// code=track=sector=-1;
+	// char msg[80];
+	// printf("Enter code, message, track, sector\n");
+	// scanf("%d,%19[^\n]s,%d,%d\n,",&code, msg, &track, &sector);
+	// printf("\ncode=%d msg=%s track=%d sec=%d\n", code, msg, track, sector);
+	// return 0;
 
 	print_header_line("Initializing prefs");
 	init_tumult_prefs();
@@ -211,13 +424,7 @@ int main(void) {
 	print_prefs(&prefs);
 	putch(13); //newline
 
-	printf("type x to exit, or any other key to continue\n");
-	char c=0;
-	do {
-		c = getch();
-	} while (c==0);
-
-	if (c=='x') {
+	if (! print_continue_message()) {
 		printf("Exiting...\n");
 		return -1;
 	}
@@ -225,37 +432,41 @@ int main(void) {
 	putchar(147); //CLR
 
 	print_header_line("Saving prefs\n");
-	if (!save_prefs(&prefs, 1, prefs.prefs_device, (char *)"@0:prefs2.bin")) {
+
+	sprintf(misc_buffer, "@0:%s",PREFS_FILENAME);
+
+	if (!save_prefs(&prefs, 1, 1,misc_buffer)) {
 		print_kernalio_message(1,"Error saving preferences!");
 		return -1;
 	}
 
-	// New_Prefs empty_prefs = (New_Prefs){
-	// 	.input_device=0,.prefs_device=0,
-	// 	.up_key=0, .left_key=0, .right_key=0, .down_key=0,
-	// 	.fire_key=0, .menu_key=0};
-	// copy_prefs(&prefs, empty_prefs);
-	// init_prefs( &prefs, 0,0,0,0,0,0,0,0);
+	print_header_line("Showing dir\n");
+	print_dir(prefs.prefs_device);
+
+	if (!print_continue_message() ) {
+		printf("Exiting...\n");
+		return 0;
+	}
+
 	clear_prefs(&prefs);
 
-	// set_pref_value(&prefs, PREFS_PREFS_DEVICE_NUM, (char *)"prefs_device", 0);
-	// prefs.entry_count=0;
-
-	print_header_line("Showing empty prefs");
-	print_prefs(&prefs);
-	putch(13);	//newline
+	//print_header_line("Showing empty prefs");
+	//print_prefs(&prefs);
+	//putch(13);	//newline
 
 	prefs.prefs_device = LAST_DEVICE_NUM;
 
 	print_header_line("Showing prefs after read");
-	if (load_prefs(&prefs, 1,prefs.prefs_device,(char *)"PREFS2.BIN")) {
+	if (load_prefs(&prefs, 1,0,PREFS_FILENAME)) {
 		print_prefs(&prefs);
 		putch(13);
 	} else {
-		print_kernalio_message(1,"Error reading prefs from \"%s\"", "prefs2.bin");
+		int st=krnio_status();
+		print_kernalio_message(1,"Error code %d reading prefs from \"%s\"", st, PREFS_FILENAME);
 		return -1;
 	}
 
+	close_error_channel(15);
 	
 	return 0;
 
@@ -317,6 +528,15 @@ int main(void) {
 	return 0;
 }
 
+
+bool print_continue_message() {
+	printf("type x to exit, return to continue\n");
+	char c=0;
+	do {
+		c = getch();
+	} while (c==0);
+	return (c != 'x');
+}
 /** Returns whether we should keep running the main loop */
 bool main_loop() {
 	vic_waitFrame();
@@ -446,15 +666,6 @@ bool move_ship_joystick() {
 	//};
 	return true;
 };
-
-/* Send a debug message to the screen */
-void out(const char *fmt, ...) {
-//	#ifdef DEBUG
-		char buff[50];
-		// const char *fmt = "0123456789012345678901234567890123456789012345678901234567890123456789";
-		sformat(buff, fmt, (int *)&fmt + 1, true);
-//	#endif
-}
 
 void init_play_screen() {
 	for (int i=0;i<8192;i++){

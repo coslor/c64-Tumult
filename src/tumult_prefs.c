@@ -1,6 +1,9 @@
 #include "includes/new_prefs.h"
 #include "includes/Tumult.h"
 #include <stdbool.h>
+#include <c64/keyboard.h>
+#include "includes/prefs.h"
+
 //extern Preferences prefs;
 extern struct New_Prefs	prefs;
 

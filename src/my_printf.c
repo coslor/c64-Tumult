@@ -298,7 +298,7 @@ void sqlite3VXPrintf(
     /* Get the field width */
     width = 0;
     if( c=='*' ){
-      width = va_arg(ap,int);
+      width = va_va_arg(ap,int);
       if( width<0 ){
         flag_leftjustify = 1;
         width = -width;

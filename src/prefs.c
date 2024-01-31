@@ -47,7 +47,7 @@ Preference find_preference_by_name(Preferences *prefs, const char *pref_name) {
  * @param pref_name 
  * @return int 
  */
- int find_pref_value_by_name(Preferences *prefs, char *pref_name) {
+ int find_pref_value_by_name(Preferences *prefs, const char *pref_name) {
 	Preference pref = find_preference_by_name(prefs, pref_name);
 	if (pref != NULL) {
 		return pref.value;
