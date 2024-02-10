@@ -66,7 +66,7 @@ typedef struct Preferences {
 void set_pref_value(Preferences *prefs, int pref_num, const char *pref_name, int pref_value);
 Preference find_preference_by_name(Preferences *prefs, const char *pref_name);
 int find_pref_value_by_name(Preferences *prefs, const char *pref_name);
-void print_prefs(Preferences *prefs);
+//void print_prefs(Preferences *prefs);
 bool read_prefs(Preferences *prefs, int enum_count);
 bool read_prefs_from_file(int file_num, const char *filename, Preferences *prefs);
 bool write_prefs_to_file(Preferences *prefs, int file_num, const char *filename) ;

@@ -94,7 +94,7 @@ bool write_prefs_to_file(Preferences *prefs, int file_num, const char *filename)
 			//print_kernalio_message(dev_num,"error calling chkout()\n");
 		}
 		//krnio_close(file_num);
-		//TODO something weird is going on here!!
+		//FIXME something weird is going on here!!
 		krnio_clrchn();
 		printf("file closed!\n");
 		if (!success) {

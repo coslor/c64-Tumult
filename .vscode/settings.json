@@ -27,7 +27,10 @@
 		"conio.h": "c",
 		"kernalio.h": "c",
 		"tests.h": "c",
-		"logger.h": "c"
+		"logger.h": "c",
+		"crt.h": "c",
+		"test_logger.h": "c",
+		"log_level.h": "c"
 	},
 	"C_Cpp.errorSquiggles": "enabled"
 }

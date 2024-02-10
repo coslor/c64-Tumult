@@ -1,62 +1,44 @@
-# .SUFFIXES:
-# .SUFFIXES: .c .prg
 VPATH = src:src/includes;src/tests/includes
 
 CC			=c:/Users/chris/oscar64/bin/oscar64.exe
 
-CFLAGS=-g -O0 -n -pp -v2
+CFLAGS=-g -O0 -n -v2 -dLOG_LEVEL=100 -dCLC_LOGGING
 #-v2
 #-e
 
-# OBJDIR=bin
-# vpath %.c src
-
-
-#$(OBJDIR) obj/%.o : %.c ku.h kudefines.h kuglobals.h kufns.h 
-#  $(CC) -c $(CPPFLAGS) -o="$@.prg" $<
-# ./bin/%.prg: ./src/%.c
-# 	$(CC) -c $(CPPFLAGS) -o=bin/$@.prg src/$<
-#	$(CC) $(CFLAGS) $<
-
 #
-# Only compile Tumult.c, but have freshness dependencies on the other cc files, all .h files, all assets & sprites
+# 
 #
-DEPS=Tumult.c logger.c prefs.c file_io.c tumult_prefs.c new_prefs.c 
+MY_DEPS2=Tumult.c logger.c  file_io.c tumult_prefs.c new_prefs.c 
+TEST_DEPS=tests/test_logger.c tests/test_runner.c logger.c
 # assets/* assets/sprites/* 
 
 VICE=C:/Users/chris/WinVice/GTK3VICE-3.5-win64/bin/x64sc.exe
 
-bin/Tumult.prg: $(DEPS)
-	echo prereqs are:$^;(date)>make-out.log ; $(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ 
-#>>make-out.log
+MAKE_LOG=make-out.log
+MAKE_TESTS_LOG=make-tests-out.log
 
+all:tumult tests
 
-#all: snake.prg lander.prg maze3d.prg missile.prg breakout.prg connectfour.prg hscrollshmup.prg
-#all: bin/Tumult.prg bin/staticsprite.prg bin/bitmapcolorimage.prg bin/staticsprite.prg bin/hires_pic_test.prg
-all: bin/Tumult.prg 
+bin/%.prg: $(MY_DEPS2)
+	(date) >$(MAKE_LOG) ; $(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ >>MAKE_LOG
 
-# bin/tests/struct_test.prg: struct_test.c
-# 	$(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ 
+bin/tests/%.prg: $(TEST_DEPS)
+	(date) >$(MAKE_TESTS_LOG) ; $(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ >>MAKE_TESTS_LOG
 
-# bin/tests/test_test.prg: tests/test_test.c tests/test_runner.c
-# 	$(CC) $(CFLAGS) $(INCLUDE:%=-i=%) -o="$@" $^ 
+tests: bin/tests/test_logger.prg
 
-# run_tests:bin/tests/test_test.prg
-# 	$(VICE) bin/tests/test_test.prg
-# snake.prg: snake.c
-# 	$(CC) $<
-
-# missile.prg: missile.c
-# 	$(CC) $(CFLAGS) -O3 $<
-
-# hscrollshmup.prg: hscrollshmup.c
-# 	$(CC) $(CFLAGS) -O2 $<
+tumult: bin/Tumult.prg
 
 clean:
 	$(RM) bin/*.asm bin/*.int bin/*.lbl bin/*.map bin/*.prg bin/*.bcs  bin/*.dbj bin/tests/*
 
-run: all
+run: tumult
 	$(VICE) bin/Tumult.prg
+
+run_tests: tests
+	$(VICE) bin/tests/test_logger.prg
+
 # CFLAGS		=-n
 # BIN			=bin
 # SRC			=src

@@ -71,8 +71,8 @@ bool move_bullets();
 
 /* opens prefs file, reads the data in, sets preferences as necessary, and closes the file */
 void close_file(byte file_num);
-void print_kernalio_message(byte device_num, byte file_num, const char *fmt, ...);
-
+//void print_kernalio_message(byte device_num, byte file_num, const char *fmt, ...);
+void print_kernalio_message(unsigned char device_num, const char *fmt, ...);
 //extern char * sformat(char * buff, const char * fmt, int * fps, bool print);
 
 
@@ -128,6 +128,28 @@ void print_kernalio_message(byte device_num, byte file_num, const char *fmt, ...
 
 #define NUM_FRAMES_BETWEEN_MOVE_SHIP 5
 
+typedef struct Mob {
+	byte		spr_def;	//the handle to the sprite def (sprite def address = vic_base + spr_def * 64)
+	byte		spr_num;	//the physical sprite #
+	signed int	x;			//a signed int so it can start out offscreen
+	signed int	x_vel;
+	signed char	row;		//needs to be a signed char
+	bool		visible;
+	byte		spr_color;
+} Mob;
+
+typedef struct Alien {
+	Mob			mob;
+} Alien;
+
+typedef struct Bullet {
+	Mob			mob;
+} Bullet;
+
+typedef struct Ship {
+	Mob			mob;
+} Ship;
+
 void set_text_mode();
 void die();
 bool main_loop();
@@ -140,3 +162,6 @@ bool print_continue_message();
 
 //#pragma compile("/../Tumult.c")
 
+void show_mob(Mob *m);
+void show_bullets();
+void show_aliens();

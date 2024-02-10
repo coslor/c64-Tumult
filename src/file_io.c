@@ -4,6 +4,7 @@
 #include <c64/kernalio.h>
 
 #include "includes/file_io.h"
+#include "includes/logger.h"
 
 #define MAX_KERNALIO_BUFFER_LEN 88
 char kernalio_buffer[MAX_KERNALIO_BUFFER_LEN];
@@ -40,9 +41,11 @@ void print_kernalio_message(byte device_num, const char *fmt, ...) {
 	sformat(kernalio_buffer, fmt, (int *)&fmt + 1, false);
 	int d = krnio_status();
 
-	printf("Error:\"%s\"\nError status %d on dev %d\n", kernalio_buffer, d, device_num);
-	// printf("Error status from dev %d:%d\n", device_num, krnio_pstatus[device_num]);
-	printf("Press return to continue\n");
-	getchar();
+	if (would_log(ERROR_LEVEL)) {
+		log_error("Error:\"%s\"\nError status %d on dev %d\n", kernalio_buffer, d, device_num);
+		// printf("Error status from dev %d:%d\n", device_num, krnio_pstatus[device_num]);
+		printf("Press return to continue\n");
+		getchar();
+	}
 }
 
